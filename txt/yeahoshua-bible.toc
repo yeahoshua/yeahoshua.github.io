@@ -58,9 +58,9 @@ james	by yaqob
 2_john	by yeahochanan b
 3_john	by yeahochanan c
 jude	by yeahudas
-matthew	yeahoshua swim-walker according to matthew
-mark	yeahoshua swim-walker according to mark
-luke	yeahoshua swim-walker according to luke
-acts	acts of the sent-outs
-john	yeahoshua swim-walker according to yeahochanan
-revelation	revelation of yeahoshua swim-walker
+matthew	yeahoshua sink-swim-walk-talk according to matthew
+mark	yeahoshua sink-swim-walk-talk according to mark
+luke	yeahoshua sink-swim-walk-talk according to luke
+acts	acts of the emissaries
+john	yeahoshua sink-swim-walk-talk according to yeahochanan
+revelation	revelation of yeahoshua sink-swim-walk-talk
