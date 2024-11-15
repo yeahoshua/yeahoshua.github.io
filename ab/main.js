@@ -1,9 +1,6 @@
-var sel_a = null
-var sel_b = null
-var texta = null
-var textb = null
-var toca = null
-var tocb = null
+var sel = {}
+var text = {}
+var toc = {}
 var bybook = {}
 
 
@@ -14,18 +11,22 @@ function main() {
 
 // makeselect makes select fields and loads lang names
 async function makeselect() {
+  var booka = getparam("a")
+  var bookb = getparam("b")
+  if (booka == null) { booka = "yeahoshua-bible" }
+  if (bookb == null) { bookb = "bible-he-yeahoshua" }
   var sel_wrap = document.getElementById("selectwrap")
-  sel_a = elm("select", {}, sel_wrap)
-  sel_b = elm("select", {}, sel_wrap)
+  sel["a"] = elm("select", {}, sel_wrap)
+  sel["b"] = elm("select", {}, sel_wrap)
   var res = await fetch("names.json")
   var langtofile = await res.json()
   fillselect(langtofile)
-  sel_a.addEventListener("change", langa_selected) // maybe selected("a")
-  sel_b.addEventListener("change", langb_selected)
-  sel_a.value = "yeahoshua-bible"
-  sel_b.value = "bible-he-yeahoshua"
-  langa_selected()
-  langb_selected()
+  sel["a"].addEventListener("change", function() {biblechange("a")}) // maybe selected("a")
+  sel["b"].addEventListener("change", function() {biblechange("b")})
+  sel["a"].value = booka
+  sel["b"].value = bookb
+  biblechange("a")
+  biblechange("b")
 
 
 }
@@ -35,58 +36,40 @@ async function makeselect() {
 function fillselect(langtofile) {
   for (var lang of keys(langtofile)) {
     console.log(lang)
-    elm("option", {value: langtofile[lang]}, sel_a, lang)
-    elm("option", {value: langtofile[lang]}, sel_b, lang)
+    elm("option", { value: langtofile[lang] }, sel["a"], lang)
+    elm("option", { value: langtofile[lang] }, sel["b"], lang)
   }
 }
 
 
-async function langa_selected() {
-  var filea = sel_a.value
-  var res = await fetch("../txt/" + sel_a.value + ".txt")
-  texta = await res.text()
-  res = await fetch("../txt/" + sel_a.value + ".toc")
+async function biblechange(what) {
+  setparam(what, sel[what].value)
+  console.log(what)
+  var res = await fetch("../txt/" + sel[what].value + ".txt")
+  text[what] = await res.text()
+  res = await fetch("../txt/" + sel[what].value + ".toc")
   if (res.ok) {
     var toctext = await res.text()
-    toca = buildtoc(toctext)
+    toc[what] = buildtoc(toctext)
   } else { // set to null explicitly to clear old toc
-    toca = null
-  }
-  if (texta == null || textb == null) {
-    return
+    toc[what] = null
   }
   updatepaste()
   updatetoc()
-  renderbook("genesis")
-}
-// todo make it like langxselected
-async function langb_selected() {
-  var fileb = sel_b.value 
-  var res = await fetch("../txt/" + sel_b.value + ".txt")
-  textb = await res.text()
-  res = await fetch("../txt/" + sel_b.value + ".toc")
-  if (res.ok) {
-    var toctext = await res.text()
-    tocb = buildtoc(toctext)
-  } else {
-    tocb = null
-  }
-  console.log("tocb:" + tocb)
-  if (texta == null || textb == null) {
-    return
-  }
-  updatepaste()
-  updatetoc()
-  renderbook("genesis")
+  var book = getparam("book")
+  if (book == null) { book = "genesis" }
+  renderbook(book)
+
+
 }
 
 
 function updatepaste() {
   console.log("update paste")
-  var pasted = biblepaste(texta, textb).split("\n")
+  var pasted = biblepaste(text["a"], text["b"]).split("\n")
 //  console.log("pasted: " + pasted)
 //  return
-  var pastelines = biblebookchap(pasted, [toca, tocb])
+  var pastelines = biblebookchap(pasted, [toc["a"], toc["b"]])
   //console.log("pastelines tail: " + pastelines.slice(pastelines.length - 10))
   bybook = getbybook(pastelines)
 }
@@ -101,7 +84,7 @@ function updatetoc() {
   // console.log("updatetoc() booktags: " + booktags)
     
   for (var booktag of booktags) {
-    var linktext = getprintbook(booktag, toca, tocb)
+    var linktext = getprintbook(booktag, toc["a"], toc["b"])
     // var linktext = booktag
     // var link = elm("a", {}, toc, linktext) // maybe put in beautiful toc text here
     var link = document.createElement("a")
@@ -145,6 +128,15 @@ function getbybook(lines) {
   }
   return out   
 }
+function setparam(what, val) {
+  var url = new URL(window.location)
+  url.searchParams.set(what, val)
+  history.pushState(null, "", url)
+}
+function getparam(what) {
+  var params = new URLSearchParams(document.location.search)
+  return params.get(what)
+}
 // getprintbook returns the print names as they appear in toc or book headers
 function getprintbook(booktag, toca, tocb) {
   var out = null
@@ -187,6 +179,7 @@ function biblebookchap(lines, tocs) {
 // renderbook renders the clicked book in toc
 function renderbook(name) {
   // console.log("hello renderbook " + name)
+  setparam("book", name)
   var textwrap = document.getElementById("textwrap")
   textwrap.innerHTML = bookchaptohtml(bybook[name], textwrap)
 }
@@ -198,19 +191,26 @@ function bookchaptohtml(lines) {
     var f = line.split("\t")
     if (f.length < 2) { continue }
     // get all but the first
-    var juice = f.slice(1).join(" ")
+    var juice = f.slice(1).join("\t")
     if (juice.match(/##book/)) {
       var book = juice.replace(/##book /, "")
       html += "<h2>" + book + "</h2>\n"
       continue
     } else if (juice.match(/##chapter/)) {
       var chap = juice.replace(/##chapter /, "")
+      if (parseInt(chap) > 1) { html += "</table>" }
       html += "<h3>" + chap + "</h3>\n"
+      html += "<table>"
       continue
     } else {
-      html += juice + "<br/>\n"
+      // make table row from fields
+      var a = juice.split("\t")
+      for (var s of a) {
+        html += s + "<br/>"
+      }
     }
   }
+  html += "</table>"
   return html
 }
 
