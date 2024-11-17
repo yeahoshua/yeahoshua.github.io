@@ -44,6 +44,7 @@ function fillselect(langtofile) {
 
 async function biblechange(what) {
   setparam(what, sel[what].value)
+  document.title = sel["a"].options[sel["a"].selectedIndex].text + " " + sel["b"].options[sel["b"].selectedIndex].text
   console.log(what)
   var res = await fetch("../txt/" + sel[what].value + ".txt")
   text[what] = await res.text()
@@ -79,22 +80,25 @@ function updatepaste() {
 function updatetoc() {
   // pull the book-tags as keys from bybooks
   // maybe pull in more beautiful names from tocs
-  var toc = elm("div", { class: "toc" })
+  var tocelm = elm("div", { class: "toc" })
   var booktags = Object.keys(bybook)
   // console.log("updatetoc() booktags: " + booktags)
     
   for (var booktag of booktags) {
+    //console.log("booktag: " + booktag)
+    //console.log("toc: " + toc)
     var linktext = getprintbook(booktag, toc["a"], toc["b"])
+    //console.log("printtext: " + linktext)
     // var linktext = booktag
     // var link = elm("a", {}, toc, linktext) // maybe put in beautiful toc text here
     var link = document.createElement("a")
-    link.textContent = linktext
-    toc.appendChild(link)
+    link.innerHTML = linktext
+    tocelm.appendChild(link)
     link.addEventListener("click", wrp(renderbook, booktag))
-    elm("br", null, toc)
+    elm("br", null, tocelm)
   }
   document.getElementById("tocwrap").innerHTML = ""
-  document.getElementById("tocwrap").appendChild(toc)
+  document.getElementById("tocwrap").appendChild(tocelm)
 }
 
 
@@ -140,6 +144,7 @@ function getparam(what) {
 // getprintbook returns the print names as they appear in toc or book headers
 function getprintbook(booktag, toca, tocb) {
   var out = null
+  //console.log("toca: " + toca + ", tocb:" + tocb)
   // no toc is there, just return one booktag
   if (toca == null && tocb == null) {
     out = booktag
@@ -178,7 +183,7 @@ function biblebookchap(lines, tocs) {
 }
 // renderbook renders the clicked book in toc
 function renderbook(name) {
-  // console.log("hello renderbook " + name)
+  console.log("hello renderbook " + name)
   setparam("book", name)
   var textwrap = document.getElementById("textwrap")
   textwrap.innerHTML = bookchaptohtml(bybook[name], textwrap)
