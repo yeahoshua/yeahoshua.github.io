@@ -1,11 +1,15 @@
 var sel = {}
-var text = {}
 var toc = {}
+var text = {}
+var langcodes = {}
+var ww = new wordwide()
+var check = {}
 var bybook = {}
 
 
 function main() {
   makeselect()
+  initww()
 }
 
 
@@ -15,12 +19,16 @@ async function makeselect() {
   var bookb = getparam("b")
   if (booka == null) { booka = "yeahoshua-bible" }
   if (bookb == null) { bookb = "bible-he-yeahoshua" }
-  var sel_wrap = document.getElementById("selectwrap")
-  sel["a"] = elm("select", {}, sel_wrap)
-  sel["b"] = elm("select", {}, sel_wrap)
+  var wrapa = document.getElementById("select_a")
+  var wrapb = document.getElementById("select_b")
+  sel["a"] = elm("select", {}, wrapa)
+  sel["b"] = elm("select", {}, wrapb)
   var res = await fetch("names.json")
   var langtofile = await res.json()
-  fillselect(langtofile)
+  for (var lang of keys(langtofile)) {
+    elm("option", { value: langtofile[lang] }, sel["a"], lang)
+    elm("option", { value: langtofile[lang] }, sel["b"], lang)
+  }
   sel["a"].addEventListener("change", function() {biblechange("a")}) // maybe selected("a")
   sel["b"].addEventListener("change", function() {biblechange("b")})
   sel["a"].value = booka
@@ -32,18 +40,9 @@ async function makeselect() {
 }
 
 
-// fillselect fills the select fields
-function fillselect(langtofile) {
-  for (var lang of keys(langtofile)) {
-    console.log(lang)
-    elm("option", { value: langtofile[lang] }, sel["a"], lang)
-    elm("option", { value: langtofile[lang] }, sel["b"], lang)
-  }
-}
-
-
 async function biblechange(what) {
   setparam(what, sel[what].value)
+  // is there no shorter native way to get selected text of element?
   document.title = sel["a"].options[sel["a"].selectedIndex].text + " " + sel["b"].options[sel["b"].selectedIndex].text
   console.log(what)
   var res = await fetch("../txt/" + sel[what].value + ".txt")
@@ -57,9 +56,8 @@ async function biblechange(what) {
   }
   updatepaste()
   updatetoc()
-  var book = getparam("book")
-  if (book == null) { book = "genesis" }
-  renderbook(book)
+  render()
+  oncheck(what)
 
 
 }
@@ -102,8 +100,43 @@ function updatetoc() {
 }
 
 
+async function initww() {
+  var res = await fetch("langcodes.json")
+  langcodes = await res.json()
+  check["a"] = document.querySelector("#check_a")
+  check["b"] = document.querySelector("#check_b")
+  check["a"].addEventListener("change", function() { oncheck("a") })
+  check["b"].addEventListener("change", function() { oncheck("b") })
 
 
+}
+
+
+// oncheck loads lingodict if needed for checkbox and kicks of render
+async function oncheck(what) {
+  console.log("oncheck " + what)
+  var langcode = langcodes[sel[what].value]
+  console.log("langcode: " + langcode)
+  console.log("ww has dict he: " + ww.hasdict(langcode))
+  // we need a lingodict
+  if (check[what].checked && !ww.hasdict(langcode)) {
+    console.log("fetching dict")
+    var res = await fetch("../lingodicts/lingo-dict-" + langcode + ".json")
+    var d = await res.json()
+    ww.adddict(d)
+  }
+  render()
+}
+
+
+
+
+// render renders book from param
+function render() {
+  var book = getparam("book")
+  if (book == null) { book = "genesis" }
+  renderbook(book)
+}
 // buildtoc
 function buildtoc(toctext) {
   var lines = toctext.split("\n")
@@ -186,11 +219,40 @@ function renderbook(name) {
   console.log("hello renderbook " + name)
   setparam("book", name)
   var textwrap = document.getElementById("textwrap")
-  textwrap.innerHTML = bookchaptohtml(bybook[name], textwrap)
+  var lines = insertww(bybook[name])
+  textwrap.innerHTML = tohtml(lines)
 }
-// bookchap to html returns html from bookchap text
+// insertww inserts word by word as selected on checkboxes into lines
+function insertww(lines) {
+  out = []
+  for (var line of lines) {
+    var outline = ""
+    var f = line.split("\t")
+    // normal line
+    if (!f[1].match(/^##/)) {
+      outline = f[0]
+      for (var i = 1; i < f.length; i++) {
+        var s = f[i]
+        if (i == 1 && check["a"].checked) {
+	  outline += "\t" + ww.wwhtml(s, langcodes[sel["a"].value])
+	} else if (i == 2 && check["b"].checked) {
+	  outline += "\t" + ww.wwhtml(s, langcodes[sel["b"].value])
+	} else {
+	  outline += "\t" + s
+	}
+      }
+    }
+    // format line
+    else {
+      outline = line
+    }
+    out.push(outline)
+  }
+  return out
+}
+// tohtml returns html from bookchap text
 // should it take lines or text?
-function bookchaptohtml(lines) {
+function tohtml(lines) {
   var html = ""
   for (var line of lines) {
     var f = line.split("\t")
@@ -211,8 +273,8 @@ function bookchaptohtml(lines) {
       // make table row from fields
       var a = juice.split("\t")
       for (var s of a) {
-        html += s + "<br/>"
-      }
+      	  html += s + "<br/>"
+      }	
     }
   }
   html += "</table>"

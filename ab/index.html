@@ -2,16 +2,33 @@
 <head>
   <script src="shorthand.js"></script>
   <script src="biblepaste.js"></script>
+  <script src="wordwide.js"></script> <!-- for now comment out the last line manually, module.exports = wordwide -->
+  <!-- <script src="zh-ja-breaks.js"></script>-->
 </head>
 
 <body style='width: 420pt; margin-left: auto; margin-right: auto; text-align: justify' dir=''>
 <style>
 a { color: black; text-decoration: none; cursor: pointer }
 #tocwrap { column-count: 2 }
-#selectwrap { margin: auto; width: fit-content } /* need fit-content width for centering to work */
+#selectbar { margin: auto; width: fit-content; display: flex } /* need fit-content width for centering to work */
+#selectbar span { position: relative }
+#selectbar label { color: gray; font-family: roboto }
+#selectbar select { font-family: roboto }
 select { border: none; background: none; }
 </style>
-<div id="selectwrap">
+<div id="selectbar">
+ <span>
+  <div id="select_a">
+  </div>
+  <input type="checkbox" id="check_a">
+  <label for="check_a">word by word</label>
+ </span>
+ <span>
+  <div id="select_b">
+  </div>
+  <input type="checkbox" id="check_b">
+  <label for="check_b">word by word</label>
+ </span>
 </div>
 <br/>
 <div id="tocwrap" >
