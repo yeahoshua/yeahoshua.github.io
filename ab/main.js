@@ -270,6 +270,10 @@ function tohtml(lines) {
       html += "<table>"
       continue
     } else {
+      // add verse number
+      var b = f[0].split(":")
+      html += "<sup>" + b[1] + "</sup>" // sup: superscript. without blank, but with css padding. if blank, the blank has slightly different width each line because of block text
+
       // make table row from fields
       var a = juice.split("\t")
       for (var s of a) {

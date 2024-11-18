@@ -10,7 +10,7 @@ class wordwide {
   
 
 
-    ww(text, lang, tolang="en", tlit=false, marksourceword=false) {
+  ww(text, lang, tolang="en", tlit=false, marksourceword=false) {
       // replace [[]] brackets (used by output) with (()) braces
       text = text.replace(/\[\[/g, "((")
       text = text.replace(/\]\]/g, "))")
@@ -57,8 +57,7 @@ class wordwide {
   
 
   // wwhtml returns text as wordwide html
-    wwhtml(text, langa, langb="en", tlit=false) {
-
+  wwhtml(text, langa, langb="en", tlit=false) {
     return wordwide.wwtohtml(this.ww(text, langa, langb, tlit))
   }
   
@@ -72,7 +71,10 @@ class wordwide {
       // close blacket: insert extra blank
       s = s.replaceAll(/\]\] /g, '<\/span>&nbsp; ') 
       // close bracket before comma etc: insert extra blank after comma. blank optional if no blank after last ]] in text.
-      s = s.replaceAll(/\]\]([^\p{L}\p{M}])+ ?/gu, '<\/span>$1&nbsp; ') 
+      s = s.replaceAll(/\]\]([^\p{L}\p{M}])+ ?/gu, '<\/span>$1&nbsp; ')
+      // close blacket without following character
+      s = s.replaceAll(/\]\]/g, '<\/span>&nbsp; ') 
+  
       s = '<span style="font-weight: bold">' + s + '</span>'
       return s
   }
@@ -151,7 +153,7 @@ class wordwide {
   
 
   // adddict inserts new dict into this dict
-   adddict(newdict) {
+  adddict(newdict) {
     this.dict = wordwide.mergedict(this.dict, newdict)
   }
   
@@ -159,10 +161,7 @@ class wordwide {
   // mergedict inserts dfrom into dto, same words get overwritten
   static mergedict(dto, dfrom) {
       var out = Object.assign({}, dto) // make copy
-            console.log("out: " + JSON.stringify(out, null, " "))
-
       for (var lang of Object.keys(dfrom)) {
-//	  console.log("lang: " +lang)
   	// create dict for lang if not there
   	if (!out[lang]) { out[lang] = {} }
   	// insert english to other lang subdicts
