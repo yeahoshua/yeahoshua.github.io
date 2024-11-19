@@ -4,12 +4,14 @@ var text = {}
 var langcodes = {}
 var ww = new wordwide()
 var check = {}
+  tlitcheck = {}
 var bybook = {}
 
 
 function main() {
   makeselect()
   initww()
+  inittlit()
 }
 
 
@@ -100,6 +102,7 @@ function updatetoc() {
 }
 
 
+
 async function initww() {
   var res = await fetch("langcodes.json")
   langcodes = await res.json()
@@ -125,6 +128,23 @@ async function oncheck(what) {
     var d = await res.json()
     ww.adddict(d)
   }
+  render()
+}
+
+
+
+// inittlit finds tlit checkboxes and gives them event listeners
+function inittlit() {
+  tlitcheck["a"] = document.querySelector("#tlit_a")
+  tlitcheck["b"] = document.querySelector("#tlit_b")
+
+  tlitcheck["a"].addEventListener("change", function() { ontlit("a") })
+  tlitcheck["b"].addEventListener("change", function() { ontlit("b") })
+}
+
+
+// ontlit triggers rendering
+function ontlit() {
   render()
 }
 
@@ -234,11 +254,22 @@ function insertww(lines) {
       for (var i = 1; i < f.length; i++) {
         var s = f[i]
         if (i == 1 && check["a"].checked) {
-	  outline += "\t" + ww.wwhtml(s, langcodes[sel["a"].value])
+	  s = quickfixends(s)
+	  outline += "\t" + ww.wwhtml(s, langcodes[sel["a"].value], "en", tlitcheck["a"].checked)
 	} else if (i == 2 && check["b"].checked) {
-	  outline += "\t" + ww.wwhtml(s, langcodes[sel["b"].value])
+	  s = quickfixends(s)
+	  // console.log(s)
+	  outline += "\t" + ww.wwhtml(s, langcodes[sel["b"].value], "en", tlitcheck["b"].checked)
 	} else {
-	  outline += "\t" + s
+	  // console.log("tlit b: " + tlitcheck["b"].checked)
+	  // translit if set
+	  if (i == 1 && tlitcheck["a"].checked || i == 2 && tlitcheck["b"].checked) {
+	    //console.log("translit: " + translit(s))
+	    outline += "\t" + translit(s)
+	    
+	  } else { // else don't translit
+	    outline += "\t" + s
+	  }
 	}
       }
     }
@@ -285,6 +316,17 @@ function tohtml(lines) {
   return html
 }
 
+// quickfixends puts hebrew and greek wordendings back to normal
+function quickfixends(s) {
+  s = s.replace(/כ(\P{L})/gu, "ך$1") // actually k$1
+  s = s.replace(/מ(\P{L})/gu, "ם$1")
+  s = s.replace(/נ(\P{L})/gu, "ן$1")
+  s = s.replace(/פ(\P{L})/gu, "ף$1")
+  s = s.replace(/צ(\P{L})/gu, "ץ$1")
+ 
+  s = s.replace(/σ(\P{L})/g, "ς$1")
+  return s
+}
 
 
 

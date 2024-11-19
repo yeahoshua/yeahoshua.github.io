@@ -1,9 +1,13 @@
 <html>
 <head>
+  <meta charset='utf-8'>
   <script src="shorthand.js"></script>
   <script src="biblepaste.js"></script>
   <script src="wordwide.js"></script> <!-- for now comment out the last line manually, module.exports = wordwide -->
   <!-- <script src="zh-ja-breaks.js"></script>-->
+  <script src="lm-names-and-google.js"></script>
+  <script src="kanjidict.js"></script>
+  <script src="translit.js"></script>
 </head>
 
 <body style='width: 420pt; margin-left: auto; margin-right: auto; text-align: justify' dir=''>
@@ -21,12 +25,18 @@ select { border: none; background: none; }
  <span>
   <div id="select_a">
   </div>
+  <input type="checkbox" id="tlit_a">
+  <label for="tlit_a">translit</label>
+  <br/>
   <input type="checkbox" id="check_a">
   <label for="check_a">word by word</label>
  </span>
  <span>
   <div id="select_b">
   </div>
+  <input type="checkbox" id="tlit_b">
+  <label for="tlit_b">translit</label>
+  <br/>
   <input type="checkbox" id="check_b">
   <label for="check_b">word by word</label>
  </span>
