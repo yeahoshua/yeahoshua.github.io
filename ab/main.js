@@ -137,14 +137,19 @@ async function oncheck(what) {
 function inittlit() {
   tlitcheck["a"] = document.querySelector("#tlit_a")
   tlitcheck["b"] = document.querySelector("#tlit_b")
-
   tlitcheck["a"].addEventListener("change", function() { ontlit("a") })
   tlitcheck["b"].addEventListener("change", function() { ontlit("b") })
+  if (getparam("tlit_a") == "true") { tlitcheck["a"].checked = true }
+  if (getparam("tlit_b") == "true") { tlitcheck["b"].checked = true }
+
+
 }
 
 
 // ontlit triggers rendering
-function ontlit() {
+function ontlit(what) {
+  console.log(tlitcheck[what].checked) 
+  setparam("tlit_" + what, tlitcheck[what].checked) 
   render()
 }
 
@@ -202,7 +207,16 @@ function getprintbook(booktag, toca, tocb) {
   if (toca == null && tocb == null) {
     out = booktag
   } else { // at least one toc is there, return both names
-    out = (toca != null ? toca[booktag] : booktag) + " " + (tocb != null ? tocb[booktag] : booktag)
+    var booka = booktag
+    // carry the translit
+    if (toca != null) {
+      booka = (tlitcheck["a"].checked ? translit(toca[booktag]) : toca[booktag])
+    }
+    var bookb = booktag
+    if (tocb != null) {
+      bookb = (tlitcheck["b"].checked ? translit(tocb[booktag]) : tocb[booktag])
+    }
+    out = booka + " " + bookb
   }
   return out
 }
