@@ -65,13 +65,10 @@ async function biblechange(what) {
 }
 
 
+// updatepaste pastes the current selected bibles and saves them in a dictionary that's keyed by book
 function updatepaste() {
-  console.log("update paste")
   var pasted = biblepaste(text["a"], text["b"]).split("\n")
-//  console.log("pasted: " + pasted)
-//  return
   var pastelines = biblebookchap(pasted, [toc["a"], toc["b"]])
-  //console.log("pastelines tail: " + pastelines.slice(pastelines.length - 10))
   bybook = getbybook(pastelines)
 }
 
@@ -110,6 +107,8 @@ async function initww() {
   check["b"] = document.querySelector("#check_b")
   check["a"].addEventListener("change", function() { oncheck("a") })
   check["b"].addEventListener("change", function() { oncheck("b") })
+  if (getparam("ww_a") == "true") { check["a"].checked = true }
+  if (getparam("ww_b") == "true") { check["b"].checked = true }
 
 
 }
@@ -117,13 +116,12 @@ async function initww() {
 
 // oncheck loads lingodict if needed for checkbox and kicks of render
 async function oncheck(what) {
-  console.log("oncheck " + what)
+  setparam("ww_" + what, check[what].checked)
+  
   var langcode = langcodes[sel[what].value]
-  console.log("langcode: " + langcode)
-  console.log("ww has dict he: " + ww.hasdict(langcode))
+
   // we need a lingodict
   if (check[what].checked && !ww.hasdict(langcode)) {
-    console.log("fetching dict")
     var res = await fetch("../lingodicts/lingo-dict-" + langcode + ".json")
     var d = await res.json()
     ww.adddict(d)
@@ -181,7 +179,6 @@ function getbybook(lines) {
     var a = line.split(" ")
     // new book
     if (a[0] != thisbook) {
-      //console.log("a[0]: " + a[0])
       out[a[0]] = []
       thisbook = a[0]
     }
@@ -250,14 +247,13 @@ function biblebookchap(lines, tocs) {
 }
 // renderbook renders the clicked book in toc
 function renderbook(name) {
-  console.log("hello renderbook " + name)
   setparam("book", name)
   var textwrap = document.getElementById("textwrap")
-  var lines = insertww(bybook[name])
+  var lines = insertwwtlit(bybook[name])
   textwrap.innerHTML = tohtml(lines)
 }
-// insertww inserts word by word as selected on checkboxes into lines
-function insertww(lines) {
+// insertwwtlit inserts translit and word by word as selected on checkboxes into lines
+function insertwwtlit(lines) {
   out = []
   for (var line of lines) {
     var outline = ""
@@ -326,7 +322,6 @@ function tohtml(lines) {
       }	
     }
   }
-  html += "</table>"
   return html
 }
 
