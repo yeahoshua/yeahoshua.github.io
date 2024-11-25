@@ -24,7 +24,7 @@ function biblepaste(texta, textb) {
     b = a[0].split(/[ :]/)
     booka[na] = b[0]
     chapnuma[na] = b[1]
-    versenuma[na] = b[2]
+    versenuma[na] = parseInt(b[2]) // quick fix: for verse nums like 2_chronicles 36:2a in lxx brenton
     // console.log(versetaga[na] + " " + chapnuma[na] + " " + versenuma[na])
     na++
   }
@@ -37,7 +37,7 @@ function biblepaste(texta, textb) {
     b = a[0].split(/[ :]/)
     bookb[nb] = b[0]
     chapnumb[nb] = b[1]
-    versenumb[nb] = b[2]
+    versenumb[nb] = parseInt(b[2])
     nb++
   }
 //  return
@@ -50,39 +50,53 @@ function biblepaste(texta, textb) {
     //console.log()
     if (versetaga[ia] == versetagb[ib]) {
       iamatch = ia
-      ibmatch = ib
-      out += versetaga[ia] + "\t" + linea[ia] + "\t" + lineb[ib] + "\n"
+      ibmatch = ib   
+      var add = versetaga[ia] + "\t" + linea[ia] + "\t" + lineb[ib] + "\n"
+      out += add
+      console.log(add)
       ia++
       ib++
       continue
     }
-    if (versetaga[ia] == versetaga[iamatch]) {
-      out += versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
+    if (booka[ia] == booka[iamatch] && chapnuma[ia] == chapnuma[iamatch] && versenuma[ia] == versenuma[iamatch]) {
+      var add = versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
+      out += add
+      console.log(add)
       ia++
       continue
     }
-    if (versetagb[ib] == versetagb[ibmatch]) {
-      out += versetagb[ib] + "\t\t" + lineb[ib] + "\n"
+    if (bookb[ib] == bookb[ibmatch] && chapnumb[ib] == chapnumb[ibmatch] && versenumb[ib] == versenumb[ibmatch]) {
+      var add = versetagb[ib] + "\t\t" + lineb[ib] + "\n"
+      out += add
+      console.log(add)
       ib++
       continue
     }
     if (booka[ia] == booka[iamatch] && chapnuma[ia] == chapnuma[iamatch]) {
-      out += versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
+      var add = versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
+      out += add
+      console.log(add)
       ia++
       continue
     }
     if (bookb[ib] == bookb[ibmatch] && chapnumb[ib] == chapnumb[ibmatch]) {
-      out += versetagb[ib] + "\t\t" + lineb[ib] + "\n"
+      var add = versetagb[ib] + "\t\t" + lineb[ib] + "\n"
+      out += add
+      console.log(add)
       ib++
       continue
     }
     if (booka[ia] == booka[iamatch]) {
-      out += versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
+      var add = versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
+      out += add
+      console.log(add)
       ia++
       continue
     }
     if (bookb[ib] == bookb[ibmatch]) {
-      out += versetagb[ib] + "\t\t" + lineb[ib] + "\n"
+      var add = versetagb[ib] + "\t\t" + lineb[ib] + "\n"
+      out += add
+      console.log(add)
       ib++
       continue
     }
