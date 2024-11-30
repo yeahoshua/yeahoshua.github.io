@@ -56,6 +56,9 @@ async function biblechange(what) {
   } else { // set to null explicitly to clear old toc
     toc[what] = null
   }
+  if (text["a"] == null || text["b"] == null) {
+    return
+  }
   updatepaste()
   updatetoc()
   render()

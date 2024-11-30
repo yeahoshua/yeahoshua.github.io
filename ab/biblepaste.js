@@ -53,7 +53,7 @@ function biblepaste(texta, textb) {
       ibmatch = ib   
       var add = versetaga[ia] + "\t" + linea[ia] + "\t" + lineb[ib] + "\n"
       out += add
-      console.log(add)
+      // console.log(add)
       ia++
       ib++
       continue
@@ -61,42 +61,42 @@ function biblepaste(texta, textb) {
     if (booka[ia] == booka[iamatch] && chapnuma[ia] == chapnuma[iamatch] && versenuma[ia] == versenuma[iamatch]) {
       var add = versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
       out += add
-      console.log(add)
+      // console.log(add)
       ia++
       continue
     }
     if (bookb[ib] == bookb[ibmatch] && chapnumb[ib] == chapnumb[ibmatch] && versenumb[ib] == versenumb[ibmatch]) {
       var add = versetagb[ib] + "\t\t" + lineb[ib] + "\n"
       out += add
-      console.log(add)
+      // console.log(add)
       ib++
       continue
     }
     if (booka[ia] == booka[iamatch] && chapnuma[ia] == chapnuma[iamatch]) {
       var add = versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
       out += add
-      console.log(add)
+      // console.log(add)
       ia++
       continue
     }
     if (bookb[ib] == bookb[ibmatch] && chapnumb[ib] == chapnumb[ibmatch]) {
       var add = versetagb[ib] + "\t\t" + lineb[ib] + "\n"
       out += add
-      console.log(add)
+      // console.log(add)
       ib++
       continue
     }
     if (booka[ia] == booka[iamatch]) {
       var add = versetaga[ia] + "\t" + linea[ia] + "\t" + "\n"
       out += add
-      console.log(add)
+      // console.log(add)
       ia++
       continue
     }
     if (bookb[ib] == bookb[ibmatch]) {
       var add = versetagb[ib] + "\t\t" + lineb[ib] + "\n"
       out += add
-      console.log(add)
+      // console.log(add)
       ib++
       continue
     }
