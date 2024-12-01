@@ -20,11 +20,11 @@ jonah	yonah
 micah	mikah
 nahum	nahum
 habakkuk	habaquq
-zephaniah	zefaniyeaho
+zephaniah	zefaniyeah
 haggai	hagai
 zechariah	cekariyeah
 malachi	malakhi
-psalms	praisings
+psalms	praises
 proverbs	proverbs
 job	aiob
 songs	song of songs
@@ -33,7 +33,7 @@ lamentations	how
 ecclesiastes	communer
 esther	ester
 daniel	danial
-ezra	ezra
+ezra	ecra
 nehemiah	nehemiyeah
 1_chronicles	words of the days a
 2_chronicles	words of the days b
