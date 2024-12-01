@@ -1,0 +1,66 @@
+genesis	براشيت
+exodus	شموت
+leviticus	ويقرا
+numbers	بمدبر
+deuteronomy	دبريم
+joshua	يهوشع
+judges	شفطيم
+1_samuel	شموال ا
+2_samuel	شموال ب
+1_kings	ملكيم ا
+2_kings	ملكيم ب
+isaiah	يشعيهو
+jeremiah	يرميهو
+ezekiel	يحزقال
+hosea	هوشع
+joel	يوال
+amos	عموس
+obadiah	عبديه
+jonah	يونه
+micah	ميكه
+nahum	نحوم
+habakkuk	حبقوق
+zephaniah	صفنيه
+haggai	حجي
+zechariah	زكريه
+malachi	ملاكي
+psalms	تهليم
+proverbs	مشلي
+job	ايوب
+songs	شير هشيريم
+ruth	روت
+lamentations	ايكه
+ecclesiastes	قهلت
+esther	استر
+daniel	دنيال
+ezra	عزرا
+nehemiah	نحميه
+1_chronicles	دبري هيميم ا
+2_chronicles	دبري هيميم ب
+romans	ال־هرومييم
+1_corinthians	هراشونه ال־هقورينتيم
+2_corinthians	هشنييه ال־هقورينتيم
+galatians	ال־هجلطيم
+ephesians	ال־هافسييم
+philippians	ال־هفيليفييم
+colossians	ال־هقولوميم
+1_thessalonians	هراشونه ال־هتسلونيقيم
+2_thessalonians	هشنييه ال־هتسلونيقيم
+1_timothy	هراشونه ال־طيموتيوم
+2_timothy	هشنييه ال־طيموتيوم
+titus	ال־طيطوم
+philemon	ال־فيليمون
+hebrews	ال־هعبريم
+james	يعقب
+1_peter	فطروم هراشونه
+2_peter	فطروم هشنييه
+1_john	يوحنن هراشونه
+2_john	يوحنن هشنييه
+3_john	يوحنن هشليشيت
+jude	يهوده
+matthew	يهوشع لفي مַتָּي 
+mark	يهوشع لفي مرقومي
+luke	يهوشع لفي لوقم
+acts	معشي هشليحيم
+john	يهوشع لفي يوحنن
+revelation	هتجلوت يهوشع

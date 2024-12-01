@@ -1,0 +1,66 @@
+genesis	בראשית
+exodus	שמות
+leviticus	ויקרא
+numbers	במדבר
+deuteronomy	דברימ
+joshua	יהושע
+judges	שפטימ
+1_samuel	שמואל א
+2_samuel	שמואל ב
+1_kings	מלכימ א
+2_kings	מלכימ ב
+isaiah	ישעיהו
+jeremiah	ירמיהו
+ezekiel	יחזקאל
+hosea	הושע
+joel	יואל
+amos	עמוס
+obadiah	עבדיה
+jonah	יונה
+micah	מיכה
+nahum	נחומ
+habakkuk	חבקוק
+zephaniah	צפניה
+haggai	חגי
+zechariah	זכריה
+malachi	מלאכי
+psalms	תהלימ
+proverbs	משלי
+job	איוב
+songs	שיר השירימ
+ruth	רות
+lamentations	איכה
+ecclesiastes	קהלת
+esther	אסתר
+daniel	דניאל
+ezra	עזרא
+nehemiah	נחמיה
+1_chronicles	דברי הימימ א
+2_chronicles	דברי הימימ ב
+romans	אל־הרומיימ
+1_corinthians	הראשונה אל־הקורינתימ
+2_corinthians	השנייה אל־הקורינתימ
+galatians	אל־הגלטימ
+ephesians	אל־האפסיימ
+philippians	אל־הפיליפיימ
+colossians	אל־הקולומימ
+1_thessalonians	הראשונה אל־התסלוניקימ
+2_thessalonians	השנייה אל־התסלוניקימ
+1_timothy	הראשונה אל־טימותיומ
+2_timothy	השנייה אל־טימותיומ
+titus	אל־טיטומ
+philemon	אל־פילימונ
+hebrews	אל־העברימ
+james	יעקב
+1_peter	פטרומ הראשונה
+2_peter	פטרומ השנייה
+1_john	יוחננ הראשונה
+2_john	יוחננ השנייה
+3_john	יוחננ השלישית
+jude	יהודה
+matthew	יהושע לפי מַתָּי 
+mark	יהושע לפי מרקומי
+luke	יהושע לפי לוקמ
+acts	מעשי השליחימ
+john	יהושע לפי יוחננ
+revelation	התגלות יהושע
