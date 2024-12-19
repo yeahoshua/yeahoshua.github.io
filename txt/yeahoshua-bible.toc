@@ -11,22 +11,22 @@ judges	judges
 2_kings	kings b
 isaiah	yeshuayeaho
 jeremiah	yeremiyeaho
-ezekiel	heceqial
-hosea	hosea
+ezekiel	yechecqial
+hosea	hoshea
 joel	yoal
 amos	amos
 obadiah	obadiyeah
 jonah	yonah
 micah	mikah
-nahum	nahum
-habakkuk	habaquq
+nahum	nachum
+habakkuk	chabaquq
 zephaniah	zefaniyeah
-haggai	hagai
+haggai	chagai
 zechariah	cekariyeah
 malachi	malakhi
 psalms	praises
 proverbs	proverbs
-job	aiob
+job	aiyob
 songs	song of songs
 ruth	rut
 lamentations	how
@@ -34,7 +34,7 @@ ecclesiastes	communer
 esther	ester
 daniel	danial
 ezra	ecra
-nehemiah	nehemiyeah
+nehemiah	nechemiyeah
 1_chronicles	words of the days a
 2_chronicles	words of the days b
 romans	to the romans
