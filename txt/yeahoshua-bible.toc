@@ -5,8 +5,8 @@ numbers	in the desert
 deuteronomy	words
 joshua	yeahoshua
 judges	judges
-1_samuel	samuel a
-2_samuel	samuel b
+1_samuel	shmual a
+2_samuel	shmual b
 1_kings	kings a
 2_kings	kings b
 isaiah	yeshuayeaho
@@ -58,9 +58,9 @@ james	by yaqob
 2_john	by yeahochanan b
 3_john	by yeahochanan c
 jude	by yeahudas
-matthew	yeahoshua sink-swim-walk-talk according to matityeaho
-mark	yeahoshua sink-swim-walk-talk according to mark
-luke	yeahoshua sink-swim-walk-talk according to luke
+matthew	yeahoshua sink-swim-conversation according to matityeaho
+mark	yeahoshua sink-swim-conversation according to mark
+luke	yeahoshua sink-swim-conversation according to luke
 acts	acts of the emissaries
-john	yeahoshua sink-swim-walk-talk according to yeahochanan
-revelation	revelation of yeahoshua sink-swim-walk-talk
+john	yeahoshua sink-swim-conversation according to yeahochanan
+revelation	revelation of yeahoshua sink-swim-conversation
