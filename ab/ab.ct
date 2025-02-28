@@ -30,16 +30,24 @@ do something about the big index file.
 
 </head>
 
-<body style="width: 420pt; margin-left: auto; margin-right: auto; text-align: justify; font-family:'Noto Serif', 'PT Serif', 'Georgia'" dir=''>
+<body dir=''>
 <style>
+body {
+  width: 500pt;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: justify;
+  font-size: 16pt;
+  font-family:'Noto Serif', 'PT Serif', 'Georgia'
+}
 a { color: black; text-decoration: none; cursor: pointer }
 #tocwrap { column-count: 2 }
 #selectbar { margin: auto; width: fit-content; display: flex } /* need fit-content width for centering to work */
 #selectbar span { position: relative }
 #selectbar label { color: gray; }
 #selectbar select { font-family: 'PT Serif'}
-select { border: none; background: none; }
-#textwrap sup { /* color: gray */; font-size: 60%; padding-right: 5pt}
+select { border: none; background: none; font-size: 14pt }
+#textwrap sup { /* color: gray */; font-size: 60%; padding-right: 5pt; cursor: pointer }
 </style>
 <div id="selectbar">
  <span>
@@ -87,6 +95,7 @@ langcodes.json: ../names.txt
 <<makeselect>>
 <<change>>
 <<updatepaste>>
+<<updatebybook>>
 <<updatetoc>>
 
 <<initww>>
@@ -95,7 +104,9 @@ langcodes.json: ../names.txt
 <<inittlit>>
 <<ontlit>>
 
+<<tohtml>>
 
+// smaller functions
 <<funcs>>
 
 main()
@@ -180,10 +191,11 @@ async function biblechange(what) {
 }
 >>
 
-set the bible in the search params.
+set the bible in the search params and reset the verse-hash.
 
 <<
   setparam(what, sel[what].value)
+  sethash("")
 >>
 
 update the page title. 
@@ -220,6 +232,7 @@ update the pasted bibles and the toc
 
 <<
   updatepaste()
+  updatebybook()
   updatetoc()
 >>
 
@@ -357,7 +370,9 @@ re-render the text on tlit change.
 // ontlit triggers rendering
 function ontlit(what) {
   console.log(tlitcheck[what].checked) 
-  setparam("tlit_" + what, tlitcheck[what].checked) 
+  setparam("tlit_" + what, tlitcheck[what].checked)
+  updatebybook()
+  updatetoc()
   render()
 }
 >>
@@ -399,7 +414,18 @@ are used by renderbook later.
 <<main/updatepaste
 // updatepaste pastes the current selected bibles and saves them in a dictionary that's keyed by book
 function updatepaste() {
-  var pasted = biblepaste(text["a"], text["b"]).split("\n")
+  pasted = biblepaste(text["a"], text["b"]).split("\n")
+}
+>>
+
+<<main/vars
+var pasted = {}
+>>
+
+updatebybook updates the lines-by-book map.  it is seperate from updatepaste cause it needs to be called also after the tlit checkbox changes, cause it sets the translit of the book titles.
+
+<<main/updatebybook
+function updatebybook() {
   var pastelines = biblebookchap(pasted, [toc["a"], toc["b"]])
   bybook = getbybook(pastelines)
 }
@@ -488,8 +514,9 @@ function updatetoc() {
 we need mapping from booktags to the print book-names in the table of
 content and in the book heading, this is what getprintbook is for.
 
+getprintbook returns the print names as they appear in toc or book headers.
+
 <<main/funcs
-// getprintbook returns the print names as they appear in toc or book headers
 function getprintbook(booktag, toca, tocb) {
   var out = null
   //console.log("toca: " + toca + ", tocb:" + tocb)
@@ -506,7 +533,7 @@ function getprintbook(booktag, toca, tocb) {
     if (tocb != null) {
       bookb = (tlitcheck["b"].checked ? translit(tocb[booktag]) : tocb[booktag])
     }
-    out = booka + " " + bookb
+    out = booka + "&nbsp;&nbsp;" + bookb
   }
   return out
 }
@@ -560,10 +587,28 @@ book before.
 // renderbook renders the clicked book in toc
 function renderbook(name) {
   setparam("book", name)
+  // reset the verse-hash
+  sethash("")
   var textwrap = document.getElementById("textwrap")
   var lines = insertwwtlit(bybook[name])
   textwrap.innerHTML = tohtml(lines)
+
+  <<.>>
 }
+>>
+
+if there's a hash in the url, scroll to it. do this after the texts
+got filled in through the js.
+
+<<
+  if (window.location.hash) {
+    // get the string without the # character
+    var hash = window.location.hash.substring(1)
+    console.log("scrolling to hash: " + hash)
+    // scroll to the element
+    var el = document.getElementById(hash)
+    if (el) { el.scrollIntoView() }
+  }
 >>
 
 we keep the function that inserts translit and word by word seperate
@@ -613,44 +658,100 @@ function insertwwtlit(lines) {
 }
 >>
 
-this function gives us the html.
+tohtml makes html from the lines
 
-<<main/funcs
+<<main/tohtml
 // tohtml returns html from bookchap text
 // should it take lines or text?
 function tohtml(lines) {
   var html = ""
   for (var line of lines) {
+    <<split>>
+    if (juice.match(/##book/)) {
+      <<book>>
+    } else if (juice.match(/##chapter/)) {
+      <<chapter>>
+    } else {
+      <<line>>
+    }
+  }
+  return html
+}
+>>
+
+split and seperate the field with verse from the rest
+
+<<./split
     var f = line.split("\t")
     if (f.length < 2) { continue }
     // get all but the first
     var juice = f.slice(1).join("\t")
-    if (juice.match(/##book/)) {
+>>
+
+if book put it in a header
+
+<<../book
       var book = juice.replace(/##book /, "")
       html += "<h2>" + book + "</h2>\n"
       continue
-    } else if (juice.match(/##chapter/)) {
+>>
+
+if chapter put it in a sub-header and start a table.
+
+<<../chapter
       var chap = juice.replace(/##chapter /, "")
       if (parseInt(chap) > 1) { html += "</table>" }
       html += "<h3>" + chap + "</h3>\n"
       html += "<table>"
       continue
-    } else {
+>>
+
+else it's a line.
+
+<<../line
       // add verse number
       var b = f[0].split(":")
-      html += "<sup>" + b[1] + "</sup>" // sup: superscript. without blank, but with css padding. if blank, the blank has slightly different width each line because of block text
-
-      // make table row from fields
-      var a = juice.split("\t")
-      for (var s of a) {
-      	  html += s + "<br/>"
-      }	
-    }
-  }
-  return html
-}
-
 >>
+
+add versenumber.
+
+we'd like to update the hashtag to the sup's id in the url when
+clicking the versenumber, so if the link is sent, you can go to this
+verse.
+
+sup: superscript. without blank, but with css
+padding. if blank, the blank has slightly different width each line
+because of block text.
+
+<<
+      var id = f[0].replace(" ", "_") // so that blanks aren't transformed to %20 in the hash and it isn't the same string as the id anymore
+      html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>" 
+
+      // print the fields as blocks
+      var a = juice.split("\t")
+      for (var i = 0; i < a.length; i++) {
+          if (i == 0) { // the first line doesn't get display block so it stays on the same line as <sup>
+      	    html += a[i] + "<br/>"
+	  } else { // the second field gets margin bottom
+	    html += "<span style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</span>"
+	  //html += "<p>" + s + "<p/>"
+	  }
+      }	
+>>
+
+sethash sets the hash in the url without scrolling directly to it.
+
+<<main/funcs
+function sethash(hash) {
+  if (history.pushState) {
+    history.pushState(null, null, "#" + hash)
+  } else {
+    // support older browsers
+    location.hash = "#" + hash
+  }
+}
+>>
+
 
 a quick fix for end-of-word letters in hebrew and greek: our txt files
 have them as standard letters, not in their end-of-word
@@ -659,6 +760,7 @@ are found by ww.
 
 \W doesn't recognize hebrew letters as letters (why?),
 you need to use \P{L}.
+
 
 <<main/funcs
 // quickfixends puts hebrew and greek wordendings back to normal

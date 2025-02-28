@@ -5,6 +5,7 @@ var langcodes = {}
 var ww = new wordwide()
 var check = {}
   tlitcheck = {}
+var pasted = {}
 var bybook = {}
 
 
@@ -44,6 +45,7 @@ async function makeselect() {
 
 async function biblechange(what) {
   setparam(what, sel[what].value)
+  sethash("")
   // is there no shorter native way to get selected text of element?
   document.title = sel["a"].options[sel["a"].selectedIndex].text + " " + sel["b"].options[sel["b"].selectedIndex].text
   console.log(what)
@@ -60,6 +62,7 @@ async function biblechange(what) {
     return
   }
   updatepaste()
+  updatebybook()
   updatetoc()
   render()
   oncheck(what)
@@ -70,7 +73,11 @@ async function biblechange(what) {
 
 // updatepaste pastes the current selected bibles and saves them in a dictionary that's keyed by book
 function updatepaste() {
-  var pasted = biblepaste(text["a"], text["b"]).split("\n")
+  pasted = biblepaste(text["a"], text["b"]).split("\n")
+}
+
+
+function updatebybook() {
   var pastelines = biblebookchap(pasted, [toc["a"], toc["b"]])
   bybook = getbybook(pastelines)
 }
@@ -150,13 +157,65 @@ function inittlit() {
 // ontlit triggers rendering
 function ontlit(what) {
   console.log(tlitcheck[what].checked) 
-  setparam("tlit_" + what, tlitcheck[what].checked) 
+  setparam("tlit_" + what, tlitcheck[what].checked)
+  updatebybook()
+  updatetoc()
   render()
 }
 
 
 
+// tohtml returns html from bookchap text
+// should it take lines or text?
+function tohtml(lines) {
+  var html = ""
+  for (var line of lines) {
+    var f = line.split("\t")
+    if (f.length < 2) { continue }
+    // get all but the first
+    var juice = f.slice(1).join("\t")
 
+
+    if (juice.match(/##book/)) {
+      var book = juice.replace(/##book /, "")
+      html += "<h2>" + book + "</h2>\n"
+      continue
+
+
+    } else if (juice.match(/##chapter/)) {
+      var chap = juice.replace(/##chapter /, "")
+      if (parseInt(chap) > 1) { html += "</table>" }
+      html += "<h3>" + chap + "</h3>\n"
+      html += "<table>"
+      continue
+
+
+    } else {
+      // add verse number
+      var b = f[0].split(":")
+      var id = f[0].replace(" ", "_") // so that blanks aren't transformed to %20 in the hash and it isn't the same string as the id anymore
+      html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>" 
+
+      // print the fields as blocks
+      var a = juice.split("\t")
+      for (var i = 0; i < a.length; i++) {
+          if (i == 0) { // the first line doesn't get display block so it stays on the same line as <sup>
+      	    html += a[i] + "<br/>"
+	  } else { // the second field gets margin bottom
+	    html += "<span style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</span>"
+	  //html += "<p>" + s + "<p/>"
+	  }
+      }	
+
+
+    }
+  }
+  return html
+}
+
+
+
+// smaller functions
 // render renders book from param
 function render() {
   var book = getparam("book")
@@ -199,7 +258,6 @@ function getparam(what) {
   var params = new URLSearchParams(document.location.search)
   return params.get(what)
 }
-// getprintbook returns the print names as they appear in toc or book headers
 function getprintbook(booktag, toca, tocb) {
   var out = null
   //console.log("toca: " + toca + ", tocb:" + tocb)
@@ -216,7 +274,7 @@ function getprintbook(booktag, toca, tocb) {
     if (tocb != null) {
       bookb = (tlitcheck["b"].checked ? translit(tocb[booktag]) : tocb[booktag])
     }
-    out = booka + " " + bookb
+    out = booka + "&nbsp;&nbsp;" + bookb
   }
   return out
 }
@@ -251,9 +309,22 @@ function biblebookchap(lines, tocs) {
 // renderbook renders the clicked book in toc
 function renderbook(name) {
   setparam("book", name)
+  // reset the verse-hash
+  sethash("")
   var textwrap = document.getElementById("textwrap")
   var lines = insertwwtlit(bybook[name])
   textwrap.innerHTML = tohtml(lines)
+
+  if (window.location.hash) {
+    // get the string without the # character
+    var hash = window.location.hash.substring(1)
+    console.log("scrolling to hash: " + hash)
+    // scroll to the element
+    var el = document.getElementById(hash)
+    if (el) { el.scrollIntoView() }
+  }
+
+
 }
 // insertwwtlit inserts translit and word by word as selected on checkboxes into lines
 function insertwwtlit(lines) {
@@ -294,40 +365,14 @@ function insertwwtlit(lines) {
   }
   return out
 }
-// tohtml returns html from bookchap text
-// should it take lines or text?
-function tohtml(lines) {
-  var html = ""
-  for (var line of lines) {
-    var f = line.split("\t")
-    if (f.length < 2) { continue }
-    // get all but the first
-    var juice = f.slice(1).join("\t")
-    if (juice.match(/##book/)) {
-      var book = juice.replace(/##book /, "")
-      html += "<h2>" + book + "</h2>\n"
-      continue
-    } else if (juice.match(/##chapter/)) {
-      var chap = juice.replace(/##chapter /, "")
-      if (parseInt(chap) > 1) { html += "</table>" }
-      html += "<h3>" + chap + "</h3>\n"
-      html += "<table>"
-      continue
-    } else {
-      // add verse number
-      var b = f[0].split(":")
-      html += "<sup>" + b[1] + "</sup>" // sup: superscript. without blank, but with css padding. if blank, the blank has slightly different width each line because of block text
-
-      // make table row from fields
-      var a = juice.split("\t")
-      for (var s of a) {
-      	  html += s + "<br/>"
-      }	
-    }
+function sethash(hash) {
+  if (history.pushState) {
+    history.pushState(null, null, "#" + hash)
+  } else {
+    // support older browsers
+    location.hash = "#" + hash
   }
-  return html
 }
-
 // quickfixends puts hebrew and greek wordendings back to normal
 function quickfixends(s) {
   s = s.replace(/כ(\P{L})/gu, "ך$1") // actually k$1
