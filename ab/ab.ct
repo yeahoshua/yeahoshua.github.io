@@ -8,7 +8,7 @@ translit array to json that can be loaded in chrome extension and here.
 
 do something about the big index file.
 
-<</index.html
+``//index.html
 <html>
 <head>
   <meta charset='utf-8'>
@@ -77,137 +77,137 @@ select { border: none; background: none; font-size: 14pt }
 </body>
 <script src="main.js"></script>
 </html>
->>
+``
 
 draw the names from the names.txt
 
-<</makefile
+``//makefile
 all: names.json langcodes.json
 names.json: ../names.txt
 	cut -f 1,2 ../names.txt | jdict > names.json
 langcodes.json: ../names.txt
 	cut -f 2,3 ../names.txt | jdict > langcodes.json
->>
+``
 
-<</main.js: main
-<<vars>>
-<<main>>
-<<makeselect>>
-<<change>>
-<<updatepaste>>
-<<updatebybook>>
-<<updatetoc>>
+``//main.js: main
+``vars``
+``main``
+``makeselect``
+``change``
+``updatepaste``
+``updatebybook``
+``updatetoc``
 
-<<initww>>
-<<oncheck>>
+``initww``
+``oncheck``
 
-<<inittlit>>
-<<ontlit>>
+``inittlit``
+``ontlit``
 
-<<tohtml>>
+``tohtml``
 
 // smaller functions
-<<funcs>>
+``funcs``
 
 main()
->>
+``
 
-<<main/main
+``/main
 function main() {
   makeselect()
   initww()
   inittlit()
 }
->>
+``
 
 ## bible selection and display cycle
 
 hold the selection fields in dict indexed a b c...
 
-<<main/vars
+``/vars
 var sel = {}
->>
+``
 
 make language selection fields.
 
-<<main/makeselect
+``/makeselect
 // makeselect makes select fields and loads lang names
 async function makeselect() {
-  <<.>>
+  ``.``
 }
->>
+``
 
 get the files from the url params (if there).
 
-<<
+``
   var booka = getparam("a")
   var bookb = getparam("b")
   if (booka == null) { booka = "yeahoshua-bible" }
   if (bookb == null) { bookb = "bible-he-yeahoshua" }
->>
+``
 
 build two select elements.
 
-<<
+``
   var wrapa = document.getElementById("select_a")
   var wrapb = document.getElementById("select_b")
   sel["a"] = elm("select", {}, wrapa)
   sel["b"] = elm("select", {}, wrapb)
->>
+``
 
 fill them with the languages and the corresponding bible files.
 
-<<
+``
   var res = await fetch("names.json")
   var langtofile = await res.json()
   for (var lang of keys(langtofile)) {
     elm("option", { value: langtofile[lang] }, sel["a"], lang)
     elm("option", { value: langtofile[lang] }, sel["b"], lang)
   }
->>
+``
 
 give them change listeners.
 
-<<
+``
   sel["a"].addEventListener("change", function() {biblechange("a")}) // maybe selected("a")
   sel["b"].addEventListener("change", function() {biblechange("b")})
->>
+``
 
 pre-set the first to english and the second to hebrew and act as if
 they were selected by the user.
 
-<<
+``
   sel["a"].value = booka
   sel["b"].value = bookb
   biblechange("a")
   biblechange("b")
->>
+``
 
 on bible selection load its text
 
-<<main/change
+``/change
 async function biblechange(what) {
-  <<.>>
+  ``.``
 }
->>
+``
 
 set the bible in the search params and reset the verse-hash.
 
-<<
+``
   setparam(what, sel[what].value)
   sethash("")
->>
+``
 
 update the page title. 
 
-<<
+``
   // is there no shorter native way to get selected text of element?
   document.title = sel["a"].options[sel["a"].selectedIndex].text + " " + sel["b"].options[sel["b"].selectedIndex].text
->>
+``
 
 get the bible file and toc.
 
-<<
+``
   console.log(what)
   var res = await fetch("../txt/" + sel[what].value + ".txt")
   text[what] = await res.text()
@@ -218,42 +218,42 @@ get the bible file and toc.
   } else { // set to null explicitly to clear old toc
     toc[what] = null
   }
->>
+``
 
 if not both texts are there, don't update the display
 
-<<
+``
   if (text["a"] == null || text["b"] == null) {
     return
   }
->>
+``
 
 update the pasted bibles and the toc
 
-<<
+``
   updatepaste()
   updatebybook()
   updatetoc()
->>
+``
 
 and render the book.
 
-<<
+``
   render()
->>
+``
 
 take into account the ww-checkbox. this also triggers rendering of the text.
 
-<<
+``
   oncheck(what)
->>
+``
 
 the toc dict.
 
-<<main/vars
+``/vars
 var toc = {}
 var text = {}
->>
+``
 
 ## word by word
 
@@ -267,51 +267,51 @@ puts in the ww translations accordingly.
 
 at each select or deselect, kick off a render.
 
-<<main/initww
+``/initww
 async function initww() {
-  <<.>>
+  ``.``
 }
->>
+``
 
 load the mapping from the bible names to langcodes.
 
-<<
+``
   var res = await fetch("langcodes.json")
   langcodes = await res.json()
->>
+``
 
 wire in the checkboxes. 
 
-<<
+``
   check["a"] = document.querySelector("#check_a")
   check["b"] = document.querySelector("#check_b")
->>
+``
 
 give them change listeners.
 
-<<
+``
   check["a"].addEventListener("change", function() { oncheck("a") })
   check["b"].addEventListener("change", function() { oncheck("b") })
->>
+``
 
 set their initial values from search params.
 
-<<
+``
   if (getparam("ww_a") == "true") { check["a"].checked = true }
   if (getparam("ww_b") == "true") { check["b"].checked = true }
->>
+``
 
 put in the langcodes, ww and check vars.
 
-<<main/vars
+``/vars
 var langcodes = {}
 var ww = new wordwide()
 var check = {}
->>
+``
 
 the checkbox event listener.
 
-<<main/oncheck
+``/oncheck
 // oncheck loads lingodict if needed for checkbox and kicks of render
 async function oncheck(what) {
   setparam("ww_" + what, check[what].checked)
@@ -326,47 +326,47 @@ async function oncheck(what) {
   }
   render()
 }
->>
+``
 
 ## translit
 
-<<main/inittlit
+``/inittlit
 // inittlit finds tlit checkboxes and gives them event listeners
 function inittlit() {
-  <<.>>
+  ``.``
 }
->>
+``
 
 wire up the translit checkboxes
 
-<<
+``
   tlitcheck["a"] = document.querySelector("#tlit_a")
   tlitcheck["b"] = document.querySelector("#tlit_b")
->>
+``
 
 give them change listeners
 
-<<
+``
   tlitcheck["a"].addEventListener("change", function() { ontlit("a") })
   tlitcheck["b"].addEventListener("change", function() { ontlit("b") })
->>
+``
 
 set their initial values from search params.
 
-<<
+``
   if (getparam("tlit_a") == "true") { tlitcheck["a"].checked = true }
   if (getparam("tlit_b") == "true") { tlitcheck["b"].checked = true }
->>
+``
 
 the displaying functions read whether tlit is on from here.
 
-<<main/vars
+``/vars
   tlitcheck = {}
->>
+``
 
 re-render the text on tlit change.
 
-<<main/ontlit
+``/ontlit
 // ontlit triggers rendering
 function ontlit(what) {
   console.log(tlitcheck[what].checked) 
@@ -375,26 +375,26 @@ function ontlit(what) {
   updatetoc()
   render()
 }
->>
+``
 
 ## functions
 
 render is both called by biblechange and checkbox change.
 render from search params or genesis.
 
-<<main/funcs
+``/funcs
 // render renders book from param
 function render() {
   var book = getparam("book")
   if (book == null) { book = "genesis" }
   renderbook(book)
 }
->>
+``
 
 buildtoc puts the raw toc-text in a dictionary where the book-tag
 names point to the nicer print names.
 
-<<main/funcs
+``/funcs
 // buildtoc
 function buildtoc(toctext) {
   var lines = toctext.split("\n")
@@ -406,40 +406,40 @@ function buildtoc(toctext) {
   }
   return out
 }
->>
+``
 
 updatepaste gets called when a bible is selected, the bibles it pastes
 are used by renderbook later.
 
-<<main/updatepaste
+``/updatepaste
 // updatepaste pastes the current selected bibles and saves them in a dictionary that's keyed by book
 function updatepaste() {
   pasted = biblepaste(text["a"], text["b"]).split("\n")
 }
->>
+``
 
-<<main/vars
+``/vars
 var pasted = {}
->>
+``
 
 updatebybook updates the lines-by-book map.  it is seperate from updatepaste cause it needs to be called also after the tlit checkbox changes, cause it sets the translit of the book titles.
 
-<<main/updatebybook
+``/updatebybook
 function updatebybook() {
   var pastelines = biblebookchap(pasted, [toc["a"], toc["b"]])
   bybook = getbybook(pastelines)
 }
->>
+``
 
-<<main/vars
+``/vars
 var bybook = {}
->>
+``
 
 maybe it's comfortable to just do one grab in a dictionary and get all
 lines of (pasted) lines for the specific bible book we want to
 display, this is what getbybook is for. updatepaste calls it.
 
-<<main/funcs
+``/funcs
 // getbybook returns bible lines in dict keyed by book name
 function getbybook(lines) {
   var out = {}
@@ -456,25 +456,25 @@ function getbybook(lines) {
   }
   return out   
 }
->>
+``
 
 when you set document.location.search directly, the page reloads, so
 push the url on history instead.
 
-<<main/funcs
+``/funcs
 function setparam(what, val) {
   var url = new URL(window.location)
   url.searchParams.set(what, val)
   history.pushState(null, "", url)
 }
->>
+``
 
-<<main/funcs
+``/funcs
 function getparam(what) {
   var params = new URLSearchParams(document.location.search)
   return params.get(what)
 }
->>
+``
 
 rendering the whole bibles took too long, even with rendering by chunks
 (you'd have to scroll down and down and down to get to a later
@@ -484,7 +484,7 @@ clicking it in the toc.
 the .toc files are either there or not there. if there are not there
 extract the toc from the book names in the versetag.
 
-<<main/updatetoc
+``/updatetoc
 // updatetoc updates the toc content and click listeners
 function updatetoc() {
   // pull the book-tags as keys from bybooks
@@ -509,14 +509,14 @@ function updatetoc() {
   document.getElementById("tocwrap").innerHTML = ""
   document.getElementById("tocwrap").appendChild(tocelm)
 }
->>
+``
 
 we need mapping from booktags to the print book-names in the table of
 content and in the book heading, this is what getprintbook is for.
 
 getprintbook returns the print names as they appear in toc or book headers.
 
-<<main/funcs
+``/funcs
 function getprintbook(booktag, toca, tocb) {
   var out = null
   //console.log("toca: " + toca + ", tocb:" + tocb)
@@ -537,7 +537,7 @@ function getprintbook(booktag, toca, tocb) {
   }
   return out
 }
->>
+``
 
 we try to keep up the spirit of the commandline tools, to go from
 lines with versetags to an intermediary format that marks where a
@@ -548,7 +548,7 @@ it resolves the book-tag to the print book name (if given).
 biblebookchap's output on each line is a versetag followed by
 tab-seperated verses from pasted bibles, or a ##book/chapter line.
 
-<<main/funcs
+``/funcs
 // biblebookchap returns the text of the bible with interspersed ##book and ##chapter lines
 function biblebookchap(lines, tocs) {
   var inbook = null
@@ -577,13 +577,13 @@ function biblebookchap(lines, tocs) {
   }
   return out
 }
->>
+``
 
 renderbook fuses in translit and word by word translations. is
 dependent upon that updatepaste pasted the texts and chopped them by
 book before.
 
-<<main/funcs
+``/funcs
 // renderbook renders the clicked book in toc
 function renderbook(name) {
   setparam("book", name)
@@ -593,14 +593,14 @@ function renderbook(name) {
   var lines = insertwwtlit(bybook[name])
   textwrap.innerHTML = tohtml(lines)
 
-  <<.>>
+  ``.``
 }
->>
+``
 
 if there's a hash in the url, scroll to it. do this after the texts
 got filled in through the js.
 
-<<
+``
   if (window.location.hash) {
     // get the string without the # character
     var hash = window.location.hash.substring(1)
@@ -609,14 +609,14 @@ got filled in through the js.
     var el = document.getElementById(hash)
     if (el) { el.scrollIntoView() }
   }
->>
+``
 
 we keep the function that inserts translit and word by word seperate
 from the html formatting function. insertwwtlit slices the lines open,
 puts in word by word where selected, and returns the lines with the
 word by word html.
 
-<<main/funcs
+``/funcs
 // insertwwtlit inserts translit and word by word as selected on checkboxes into lines
 function insertwwtlit(lines) {
   out = []
@@ -656,62 +656,62 @@ function insertwwtlit(lines) {
   }
   return out
 }
->>
+``
 
 tohtml makes html from the lines
 
-<<main/tohtml
+``/tohtml
 // tohtml returns html from bookchap text
 // should it take lines or text?
 function tohtml(lines) {
   var html = ""
   for (var line of lines) {
-    <<split>>
+    ``split``
     if (juice.match(/##book/)) {
-      <<book>>
+      ``book``
     } else if (juice.match(/##chapter/)) {
-      <<chapter>>
+      ``chapter``
     } else {
-      <<line>>
+      ``line``
     }
   }
   return html
 }
->>
+``
 
 split and seperate the field with verse from the rest
 
-<<./split
+``./split
     var f = line.split("\t")
     if (f.length < 2) { continue }
     // get all but the first
     var juice = f.slice(1).join("\t")
->>
+``
 
 if book put it in a header
 
-<<../book
+``../book
       var book = juice.replace(/##book /, "")
       html += "<h2>" + book + "</h2>\n"
       continue
->>
+``
 
 if chapter put it in a sub-header and start a table.
 
-<<../chapter
+``../chapter
       var chap = juice.replace(/##chapter /, "")
       if (parseInt(chap) > 1) { html += "</table>" }
       html += "<h3>" + chap + "</h3>\n"
       html += "<table>"
       continue
->>
+``
 
 else it's a line.
 
-<<../line
+``../line
       // add verse number
       var b = f[0].split(":")
->>
+``
 
 add versenumber.
 
@@ -723,7 +723,7 @@ sup: superscript. without blank, but with css
 padding. if blank, the blank has slightly different width each line
 because of block text.
 
-<<
+``
       var id = f[0].replace(" ", "_") // so that blanks aren't transformed to %20 in the hash and it isn't the same string as the id anymore
       html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>" 
 
@@ -737,11 +737,11 @@ because of block text.
 	  //html += "<p>" + s + "<p/>"
 	  }
       }	
->>
+``
 
 sethash sets the hash in the url without scrolling directly to it.
 
-<<main/funcs
+``/funcs
 function sethash(hash) {
   if (history.pushState) {
     history.pushState(null, null, "#" + hash)
@@ -750,7 +750,7 @@ function sethash(hash) {
     location.hash = "#" + hash
   }
 }
->>
+``
 
 
 a quick fix for end-of-word letters in hebrew and greek: our txt files
@@ -762,7 +762,7 @@ are found by ww.
 you need to use \P{L}.
 
 
-<<main/funcs
+``/funcs
 // quickfixends puts hebrew and greek wordendings back to normal
 function quickfixends(s) {
   s = s.replace(/כ(\P{L})/gu, "ך$1") // actually k$1
@@ -774,4 +774,4 @@ function quickfixends(s) {
   s = s.replace(/σ(\P{L})/g, "ς$1")
   return s
 }
->>
+``
