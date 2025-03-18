@@ -191,12 +191,9 @@ function tohtml(lines) {
 
 
     } else {
-      // add verse number
+      var id = f[0].replace(" ", "_") 
       var b = f[0].split(":")
-      var id = f[0].replace(" ", "_") // so that blanks aren't transformed to %20 in the hash and it isn't the same string as the id anymore
       html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>" 
-
-      // print the fields as blocks
       var a = juice.split("\t")
       for (var i = 0; i < a.length; i++) {
           if (i == 0) { // the first line doesn't get display block so it stays on the same line as <sup>

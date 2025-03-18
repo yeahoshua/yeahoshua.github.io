@@ -242,7 +242,7 @@ and render the book.
   render()
 ``
 
-take into account the ww-checkbox. this also triggers rendering of the text.
+take into account the word-by-word-checkbox. this also triggers rendering of the text.
 
 ``
   oncheck(what)
@@ -257,7 +257,7 @@ var text = {}
 
 ## word by word
 
-the idea is: when a ww-checkbox is selected, check if the lingodict
+the idea is: when a word-by-word-checkbox is selected, check if the lingodict
 for the corresponding bible is there, if not, load its json and add it
 to ww.
 
@@ -266,6 +266,16 @@ looks at the checkboxes to see for what bible text ww is needed, and
 puts in the ww translations accordingly.
 
 at each select or deselect, kick off a render.
+
+for this, we need a dict `langcodes` to hold the mapping from bible
+names to langcodes, a variable ww that holds wordwide and a dict
+`check` that holds the word-by-word checkboxes.
+
+``/vars
+var langcodes = {}
+var ww = new wordwide()
+var check = {}
+``
 
 ``/initww
 async function initww() {
@@ -301,13 +311,6 @@ set their initial values from search params.
   if (getparam("ww_b") == "true") { check["b"].checked = true }
 ``
 
-put in the langcodes, ww and check vars.
-
-``/vars
-var langcodes = {}
-var ww = new wordwide()
-var check = {}
-``
 
 the checkbox event listener.
 
@@ -329,6 +332,13 @@ async function oncheck(what) {
 ``
 
 ## translit
+
+the translit setup needs a dict `tlitcheck` to hold the translit
+checkboxes.
+
+``/vars
+  tlitcheck = {}
+``
 
 ``/inittlit
 // inittlit finds tlit checkboxes and gives them event listeners
@@ -360,9 +370,6 @@ set their initial values from search params.
 
 the displaying functions read whether tlit is on from here.
 
-``/vars
-  tlitcheck = {}
-``
 
 re-render the text on tlit change.
 
@@ -539,14 +546,14 @@ function getprintbook(booktag, toca, tocb) {
 }
 ``
 
-we try to keep up the spirit of the commandline tools, to go from
-lines with versetags to an intermediary format that marks where a
-book and chapter heading should be, and then parse this format to
+when getting html from the text files we try to go from the source
+format lines with versetags to an intermediary format that marks where
+a book and chapter heading should be, and then parse this format to
 html. biblebookchap gives the intermediary format. while doing this,
 it resolves the book-tag to the print book name (if given).
 
 biblebookchap's output on each line is a versetag followed by
-tab-seperated verses from pasted bibles, or a ##book/chapter line.
+tab-seperated verses from pasted bibles, or a ##book / ##chapter line.
 
 ``/funcs
 // biblebookchap returns the text of the bible with interspersed ##book and ##chapter lines
@@ -688,7 +695,7 @@ split and seperate the field with verse from the rest
     var juice = f.slice(1).join("\t")
 ``
 
-if book put it in a header
+if it's a book put it in a header
 
 ``../book
       var book = juice.replace(/##book /, "")
@@ -696,7 +703,7 @@ if book put it in a header
       continue
 ``
 
-if chapter put it in a sub-header and start a table.
+if it's a chapter put it in a sub-header and start a table.
 
 ``../chapter
       var chap = juice.replace(/##chapter /, "")
@@ -708,26 +715,39 @@ if chapter put it in a sub-header and start a table.
 
 else it's a line.
 
+the versenumber is in a sup (superscript) tag. we'd like to update the
+hashstring in the url to the sup's id when clicking the versenumber,
+so if the link is shared then, it takes you right to the verse.
+
+the id of the sup tag is the whole versetag, with " " replaced to "_",
+so that blanks aren't transformed to %20 in the url-hashstring and it
+isn't the same string as the id anymore.
+
 ``../line
-      // add verse number
+      var id = f[0].replace(" ", "_") 
+``
+
+get the verse number.
+
+``
       var b = f[0].split(":")
 ``
 
-add versenumber.
+create the versenumber sup-tag and give it a click listener that
+updates the hashstring in the url.
 
-we'd like to update the hashtag to the sup's id in the url when
-clicking the versenumber, so if the link is sent, you can go to this
-verse.
-
-sup: superscript. without blank, but with css
-padding. if blank, the blank has slightly different width each line
-because of block text.
+the sup-tag isn't followed by a blank, whitespace is provided with css
+padding. a blank would have a slightly different width on each line
+because of the block text format, where the blank-sizes vary.
 
 ``
-      var id = f[0].replace(" ", "_") // so that blanks aren't transformed to %20 in the hash and it isn't the same string as the id anymore
       html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>" 
+``
 
-      // print the fields as blocks
+print the second language on a new line.
+
+
+``
       var a = juice.split("\t")
       for (var i = 0; i < a.length; i++) {
           if (i == 0) { // the first line doesn't get display block so it stays on the same line as <sup>
