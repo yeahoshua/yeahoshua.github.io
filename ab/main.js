@@ -7,15 +7,11 @@ var check = {}
   tlitcheck = {}
 var pasted = {}
 var bybook = {}
-
-
 function main() {
   makeselect()
   initww()
   inittlit()
 }
-
-
 // makeselect makes select fields and loads lang names
 async function makeselect() {
   var booka = getparam("a")
@@ -38,11 +34,7 @@ async function makeselect() {
   sel["b"].value = bookb
   biblechange("a")
   biblechange("b")
-
-
 }
-
-
 async function biblechange(what) {
   setparam(what, sel[what].value)
   sethash("")
@@ -66,23 +58,15 @@ async function biblechange(what) {
   updatetoc()
   render()
   oncheck(what)
-
-
 }
-
-
 // updatepaste pastes the current selected bibles and saves them in a dictionary that's keyed by book
 function updatepaste() {
   pasted = biblepaste(text["a"], text["b"]).split("\n")
 }
-
-
 function updatebybook() {
   var pastelines = biblebookchap(pasted, [toc["a"], toc["b"]])
   bybook = getbybook(pastelines)
 }
-
-
 // updatetoc updates the toc content and click listeners
 function updatetoc() {
   // pull the book-tags as keys from bybooks
@@ -108,8 +92,6 @@ function updatetoc() {
   document.getElementById("tocwrap").appendChild(tocelm)
 }
 
-
-
 async function initww() {
   var res = await fetch("langcodes.json")
   langcodes = await res.json()
@@ -119,11 +101,7 @@ async function initww() {
   check["b"].addEventListener("change", function() { oncheck("b") })
   if (getparam("ww_a") == "true") { check["a"].checked = true }
   if (getparam("ww_b") == "true") { check["b"].checked = true }
-
-
 }
-
-
 // oncheck loads lingodict if needed for checkbox and kicks of render
 async function oncheck(what) {
   setparam("ww_" + what, check[what].checked)
@@ -139,8 +117,6 @@ async function oncheck(what) {
   render()
 }
 
-
-
 // inittlit finds tlit checkboxes and gives them event listeners
 function inittlit() {
   tlitcheck["a"] = document.querySelector("#tlit_a")
@@ -149,11 +125,7 @@ function inittlit() {
   tlitcheck["b"].addEventListener("change", function() { ontlit("b") })
   if (getparam("tlit_a") == "true") { tlitcheck["a"].checked = true }
   if (getparam("tlit_b") == "true") { tlitcheck["b"].checked = true }
-
-
 }
-
-
 // ontlit triggers rendering
 function ontlit(what) {
   console.log(tlitcheck[what].checked) 
@@ -162,8 +134,6 @@ function ontlit(what) {
   updatetoc()
   render()
 }
-
-
 
 // tohtml returns html from bookchap text
 // should it take lines or text?
@@ -174,43 +144,36 @@ function tohtml(lines) {
     if (f.length < 2) { continue }
     // get all but the first
     var juice = f.slice(1).join("\t")
-
-
     if (juice.match(/##book/)) {
       var book = juice.replace(/##book /, "")
       html += "<h2>" + book + "</h2>\n"
       continue
-
-
     } else if (juice.match(/##chapter/)) {
       var chap = juice.replace(/##chapter /, "")
       if (parseInt(chap) > 1) { html += "</table>" }
       html += "<h3>" + chap + "</h3>\n"
       html += "<table>"
       continue
-
-
     } else {
       var id = f[0].replace(" ", "_") 
       var b = f[0].split(":")
-      html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>" 
       var a = juice.split("\t")
       for (var i = 0; i < a.length; i++) {
-          if (i == 0) { // the first line doesn't get display block so it stays on the same line as <sup>
-      	    html += a[i] + "<br/>"
-	  } else { // the second field gets margin bottom
-	    html += "<span style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</span>"
-	  //html += "<p>" + s + "<p/>"
+          if (i == 0) { // the first line doesn't get display block so it
+	    var langa = langcodes[sel["a"].value]
+	    html += "<div dir='" + dir(langa) + "' class='" + dir(langa) + "'>"
+	    html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>"
+	    html += a[i] + "<br/>"
+	    html += "</div>"
+   	  } else { // the second field gets margin bottom
+	    var langb = langcodes[sel["b"].value]
+	    html += "<div dir='" + dir(langb) + "' style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</div>"
 	  }
-      }	
-
-
+      }
     }
   }
   return html
 }
-
-
 
 // smaller functions
 // render renders book from param
@@ -320,8 +283,6 @@ function renderbook(name) {
     var el = document.getElementById(hash)
     if (el) { el.scrollIntoView() }
   }
-
-
 }
 // insertwwtlit inserts translit and word by word as selected on checkboxes into lines
 function insertwwtlit(lines) {
@@ -362,6 +323,14 @@ function insertwwtlit(lines) {
   }
   return out
 }
+function dir(lang) {
+  if (["he", "ar", "fa"].includes(lang)) {
+    // right to left
+    return "rtl"
+  }
+  // left to right
+  return "ltr"
+}
 function sethash(hash) {
   if (history.pushState) {
     history.pushState(null, null, "#" + hash)
@@ -382,7 +351,4 @@ function quickfixends(s) {
   return s
 }
 
-
-
 main()
-

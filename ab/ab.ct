@@ -47,7 +47,11 @@ a { color: black; text-decoration: none; cursor: pointer }
 #selectbar label { color: gray; }
 #selectbar select { font-family: 'PT Serif'}
 select { border: none; background: none; font-size: 14pt }
-#textwrap sup { /* color: gray */; font-size: 60%; padding-right: 5pt; cursor: pointer }
+#textwrap sup { /* color: gray */; font-size: 60%; cursor: pointer }
+/* sup on the left side of line */
+.ltr sup { padding-right: 5pt; }
+/* sup on the right side of line */
+.rtl sup { padding-left: 5pt; }
 </style>
 <div id="selectbar">
  <span>
@@ -733,6 +737,26 @@ get the verse number.
       var b = f[0].split(":")
 ``
 
+iterate the two language-lines.
+
+``
+      var a = juice.split("\t")
+      for (var i = 0; i < a.length; i++) {
+          if (i == 0) { // the first line doesn't get display block so it
+	    ``lang a``
+   	  } else { // the second field gets margin bottom
+	    ``lang b``
+	  }
+      }
+``
+
+both lines get a div for the text direction. (a span doesn't seem to work). the class is to give the sup tag left or right margin in css.
+
+``./lang a
+var langa = langcodes[sel["a"].value]
+html += "<div dir='" + dir(langa) + "' class='" + dir(langa) + "'>"
+``
+
 create the versenumber sup-tag and give it a click listener that
 updates the hashstring in the url.
 
@@ -741,22 +765,34 @@ padding. a blank would have a slightly different width on each line
 because of the block text format, where the blank-sizes vary.
 
 ``
-      html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>" 
+html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>"
 ``
 
-print the second language on a new line.
-
+add the line and close the div.
 
 ``
-      var a = juice.split("\t")
-      for (var i = 0; i < a.length; i++) {
-          if (i == 0) { // the first line doesn't get display block so it stays on the same line as <sup>
-      	    html += a[i] + "<br/>"
-	  } else { // the second field gets margin bottom
-	    html += "<span style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</span>"
-	  //html += "<p>" + s + "<p/>"
-	  }
-      }	
+html += a[i] + "<br/>"
+html += "</div>"
+``
+
+print the second language on a new line, give it margin bottom.
+
+``../lang b
+var langb = langcodes[sel["b"].value]
+html += "<div dir='" + dir(langb) + "' style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</div>"
+``
+
+dir gets the direction of text in given language.
+
+``/funcs
+function dir(lang) {
+  if (["he", "ar", "fa"].includes(lang)) {
+    // right to left
+    return "rtl"
+  }
+  // left to right
+  return "ltr"
+}
 ``
 
 sethash sets the hash in the url without scrolling directly to it.
