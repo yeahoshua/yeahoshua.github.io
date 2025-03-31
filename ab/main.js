@@ -7,17 +7,15 @@ var check = {}
   tlitcheck = {}
 var pasted = {}
 var bybook = {}
+
 function main() {
   makeselect()
+  
   initww()
   inittlit()
 }
 // makeselect makes select fields and loads lang names
 async function makeselect() {
-  var booka = getparam("a")
-  var bookb = getparam("b")
-  if (booka == null) { booka = "yeahoshua-bible" }
-  if (bookb == null) { bookb = "bible-he-yeahoshua" }
   var wrapa = document.getElementById("select_a")
   var wrapb = document.getElementById("select_b")
   sel["a"] = elm("select", {}, wrapa)
@@ -28,16 +26,25 @@ async function makeselect() {
     elm("option", { value: langtofile[lang] }, sel["a"], lang)
     elm("option", { value: langtofile[lang] }, sel["b"], lang)
   }
-  sel["a"].addEventListener("change", function() {biblechange("a")}) // maybe selected("a")
-  sel["b"].addEventListener("change", function() {biblechange("b")})
+  sel["a"].addEventListener("change", function() {bibleselect("a")}) // maybe selected("a")
+  sel["b"].addEventListener("change", function() {bibleselect("b")})
+  var booka = getparam("a")
+  var bookb = getparam("b")
+  if (booka == null) { booka = "yeahoshua-bible" }
+  if (bookb == null) { bookb = "bible-he-yeahoshua" }
   sel["a"].value = booka
   sel["b"].value = bookb
+
   biblechange("a")
   biblechange("b")
 }
+async function bibleselect(what) {
+  sethash("")
+  biblechange(what)
+}
 async function biblechange(what) {
   setparam(what, sel[what].value)
-  sethash("")
+//  sethash("")
   // is there no shorter native way to get selected text of element?
   document.title = sel["a"].options[sel["a"].selectedIndex].text + " " + sel["b"].options[sel["b"].selectedIndex].text
   console.log(what)
@@ -85,11 +92,17 @@ function updatetoc() {
     var link = document.createElement("a")
     link.innerHTML = linktext
     tocelm.appendChild(link)
-    link.addEventListener("click", wrp(renderbook, booktag))
+    link.addEventListener("click", wrp(bookclicked, booktag))
     elm("br", null, tocelm)
   }
   document.getElementById("tocwrap").innerHTML = ""
   document.getElementById("tocwrap").appendChild(tocelm)
+}
+function bookclicked(booktag) {
+  // set hash booktag
+  sethash(booktag)
+  // render the book
+  renderbook(booktag)
 }
 
 async function initww() {
@@ -102,15 +115,15 @@ async function initww() {
   if (getparam("ww_a") == "true") { check["a"].checked = true }
   if (getparam("ww_b") == "true") { check["b"].checked = true }
 }
-// oncheck loads lingodict if needed for checkbox and kicks of render
+// oncheck loads dict if needed for checkbox and kicks of render
 async function oncheck(what) {
   setparam("ww_" + what, check[what].checked)
   
   var langcode = langcodes[sel[what].value]
 
-  // we need a lingodict
+  // we need a dict
   if (check[what].checked && !ww.hasdict(langcode)) {
-    var res = await fetch("../lingodicts/lingo-dict-" + langcode + ".json")
+    var res = await fetch("../dicts/dict-" + langcode + ".json")
     var d = await res.json()
     ww.adddict(d)
   }
@@ -146,7 +159,8 @@ function tohtml(lines) {
     var juice = f.slice(1).join("\t")
     if (juice.match(/##book/)) {
       var book = juice.replace(/##book /, "")
-      html += "<h2>" + book + "</h2>\n"
+      var booktag = f[0].split(" ")[0]
+      html += "<h2 id='" + booktag + "'>" + book + "</h2>\n"
       continue
     } else if (juice.match(/##chapter/)) {
       var chap = juice.replace(/##chapter /, "")
@@ -161,13 +175,29 @@ function tohtml(lines) {
       for (var i = 0; i < a.length; i++) {
           if (i == 0) { // the first line doesn't get display block so it
 	    var langa = langcodes[sel["a"].value]
-	    html += "<div dir='" + dir(langa) + "' class='" + dir(langa) + "'>"
+	    var dir_a = ""
+	    if (!tlitcheck["a"].checked) {
+	      // if not tlit, get dir 
+	      dir_a = dir(langa)
+	    } else {
+	      dir_a = "ltr"
+	    }
+	    html += "<div dir='" + dir_a + "' class='" + dir_a + "'>"
 	    html += "<sup id='" + id + "' onclick='sethash(\"" + id + "\")' >" + b[1] + "</sup>"
 	    html += a[i] + "<br/>"
 	    html += "</div>"
    	  } else { // the second field gets margin bottom
 	    var langb = langcodes[sel["b"].value]
-	    html += "<div dir='" + dir(langb) + "' style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</div>"
+	    var dir_b = ""
+	    if (!tlitcheck["b"].checked) {
+	      // if not tlit, get dir
+	      dir_b = dir(langb)
+	    } else {
+	      // if tlit, dir is ltr (for now)
+	      dir_b = "ltr"
+	    }
+	      
+	    html += "<div dir='" + dir_b + "' style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</div>"
 	  }
       }
     }
@@ -175,7 +205,6 @@ function tohtml(lines) {
   return html
 }
 
-// smaller functions
 // render renders book from param
 function render() {
   var book = getparam("book")
@@ -267,12 +296,11 @@ function biblebookchap(lines, tocs) {
   return out
 }
 // renderbook renders the clicked book in toc
-function renderbook(name) {
-  setparam("book", name)
-  // reset the verse-hash
-  sethash("")
+function renderbook(booktag) {
+  setparam("book", booktag)
+  console.log("renderbook " + booktag)
   var textwrap = document.getElementById("textwrap")
-  var lines = insertwwtlit(bybook[name])
+  var lines = insertwwtlit(bybook[booktag])
   textwrap.innerHTML = tohtml(lines)
 
   if (window.location.hash) {
@@ -350,5 +378,6 @@ function quickfixends(s) {
   s = s.replace(/σ(\P{L})/g, "ς$1")
   return s
 }
+
 
 main()

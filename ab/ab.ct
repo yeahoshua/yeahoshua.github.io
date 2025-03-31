@@ -93,14 +93,17 @@ langcodes.json: ../names.txt
 	cut -f 2,3 ../names.txt | jdict > langcodes.json
 ``
 
-``//main.js: main
+``//main.js
 ``vars``
+
 ``main``
 ``makeselect``
-``change``
+``bibleselect``
+``biblechange``
 ``updatepaste``
 ``updatebybook``
 ``updatetoc``
+``bookclicked``
 
 ``initww``
 ``oncheck``
@@ -110,8 +113,19 @@ langcodes.json: ../names.txt
 
 ``tohtml``
 
-// smaller functions
-``funcs``
+``render``
+``buildtoc``
+``getbybook``
+``setparam``
+``getparam``
+``getprintbook``
+``biblebookchap``
+``renderbook``
+``insertwwtlit``
+``dir``
+``sethash``
+``quickfixends``
+
 
 main()
 ``
@@ -119,6 +133,7 @@ main()
 ``/main
 function main() {
   makeselect()
+  
   initww()
   inittlit()
 }
@@ -132,22 +147,14 @@ hold the selection fields in dict indexed a b c...
 var sel = {}
 ``
 
-make language selection fields.
+make language selection fields and initialize them from url search
+params or standard books.
 
 ``/makeselect
 // makeselect makes select fields and loads lang names
 async function makeselect() {
   ``.``
 }
-``
-
-get the files from the url params (if there).
-
-``
-  var booka = getparam("a")
-  var bookb = getparam("b")
-  if (booka == null) { booka = "yeahoshua-bible" }
-  if (bookb == null) { bookb = "bible-he-yeahoshua" }
 ``
 
 build two select elements.
@@ -173,33 +180,53 @@ fill them with the languages and the corresponding bible files.
 give them change listeners.
 
 ``
-  sel["a"].addEventListener("change", function() {biblechange("a")}) // maybe selected("a")
-  sel["b"].addEventListener("change", function() {biblechange("b")})
+  sel["a"].addEventListener("change", function() {bibleselect("a")}) // maybe selected("a")
+  sel["b"].addEventListener("change", function() {bibleselect("b")})
 ``
 
-pre-set the first to english and the second to hebrew and act as if
-they were selected by the user.
+get the files from the url params (if there). if not, pre-set the
+first to english and the second to hebrew.
+
+``
+  var booka = getparam("a")
+  var bookb = getparam("b")
+  if (booka == null) { booka = "yeahoshua-bible" }
+  if (bookb == null) { bookb = "bible-he-yeahoshua" }
+``
+
+select them and kick off the display. at the moment biblechange() needs to be called here and not from main, why?
 
 ``
   sel["a"].value = booka
   sel["b"].value = bookb
+
   biblechange("a")
   biblechange("b")
 ``
 
-on bible selection load its text
+bibleselect clears the hash and calls biblechange.
 
-``/change
+``/bibleselect
+async function bibleselect(what) {
+  sethash("")
+  biblechange(what)
+}
+``
+
+biblechange loads and displays the bible text.
+
+``/biblechange
 async function biblechange(what) {
   ``.``
 }
 ``
 
-set the bible in the search params and reset the verse-hash.
+set the bible in the search params. don't reset the hash, if we opened
+a link with a hash we'd like to scroll to it.
 
 ``
   setparam(what, sel[what].value)
-  sethash("")
+//  sethash("")
 ``
 
 update the page title. 
@@ -261,7 +288,7 @@ var text = {}
 
 ## word by word
 
-the idea is: when a word-by-word-checkbox is selected, check if the lingodict
+the idea is: when a word-by-word-checkbox is selected, check if the dict
 for the corresponding bible is there, if not, load its json and add it
 to ww.
 
@@ -319,15 +346,15 @@ set their initial values from search params.
 the checkbox event listener.
 
 ``/oncheck
-// oncheck loads lingodict if needed for checkbox and kicks of render
+// oncheck loads dict if needed for checkbox and kicks of render
 async function oncheck(what) {
   setparam("ww_" + what, check[what].checked)
   
   var langcode = langcodes[sel[what].value]
 
-  // we need a lingodict
+  // we need a dict
   if (check[what].checked && !ww.hasdict(langcode)) {
-    var res = await fetch("../lingodicts/lingo-dict-" + langcode + ".json")
+    var res = await fetch("../dicts/dict-" + langcode + ".json")
     var d = await res.json()
     ww.adddict(d)
   }
@@ -393,7 +420,7 @@ function ontlit(what) {
 render is both called by biblechange and checkbox change.
 render from search params or genesis.
 
-``/funcs
+``/render
 // render renders book from param
 function render() {
   var book = getparam("book")
@@ -405,7 +432,7 @@ function render() {
 buildtoc puts the raw toc-text in a dictionary where the book-tag
 names point to the nicer print names.
 
-``/funcs
+``/buildtoc
 // buildtoc
 function buildtoc(toctext) {
   var lines = toctext.split("\n")
@@ -450,7 +477,7 @@ maybe it's comfortable to just do one grab in a dictionary and get all
 lines of (pasted) lines for the specific bible book we want to
 display, this is what getbybook is for. updatepaste calls it.
 
-``/funcs
+``/getbybook
 // getbybook returns bible lines in dict keyed by book name
 function getbybook(lines) {
   var out = {}
@@ -472,7 +499,7 @@ function getbybook(lines) {
 when you set document.location.search directly, the page reloads, so
 push the url on history instead.
 
-``/funcs
+``/setparam
 function setparam(what, val) {
   var url = new URL(window.location)
   url.searchParams.set(what, val)
@@ -480,7 +507,7 @@ function setparam(what, val) {
 }
 ``
 
-``/funcs
+``/getparam
 function getparam(what) {
   var params = new URLSearchParams(document.location.search)
   return params.get(what)
@@ -514,11 +541,23 @@ function updatetoc() {
     var link = document.createElement("a")
     link.innerHTML = linktext
     tocelm.appendChild(link)
-    link.addEventListener("click", wrp(renderbook, booktag))
+    link.addEventListener("click", wrp(bookclicked, booktag))
     elm("br", null, tocelm)
   }
   document.getElementById("tocwrap").innerHTML = ""
   document.getElementById("tocwrap").appendChild(tocelm)
+}
+``
+
+bookclicked updates the hash after a book was clicked in toc and calls
+renderbook (which scrolls to the hash).
+
+``/bookclicked
+function bookclicked(booktag) {
+  // set hash booktag
+  sethash(booktag)
+  // render the book
+  renderbook(booktag)
 }
 ``
 
@@ -527,7 +566,7 @@ content and in the book heading, this is what getprintbook is for.
 
 getprintbook returns the print names as they appear in toc or book headers.
 
-``/funcs
+``/getprintbook
 function getprintbook(booktag, toca, tocb) {
   var out = null
   //console.log("toca: " + toca + ", tocb:" + tocb)
@@ -559,7 +598,7 @@ it resolves the book-tag to the print book name (if given).
 biblebookchap's output on each line is a versetag followed by
 tab-seperated verses from pasted bibles, or a ##book / ##chapter line.
 
-``/funcs
+``/biblebookchap
 // biblebookchap returns the text of the bible with interspersed ##book and ##chapter lines
 function biblebookchap(lines, tocs) {
   var inbook = null
@@ -594,14 +633,13 @@ renderbook fuses in translit and word by word translations. is
 dependent upon that updatepaste pasted the texts and chopped them by
 book before.
 
-``/funcs
+``/renderbook
 // renderbook renders the clicked book in toc
-function renderbook(name) {
-  setparam("book", name)
-  // reset the verse-hash
-  sethash("")
+function renderbook(booktag) {
+  setparam("book", booktag)
+  console.log("renderbook " + booktag)
   var textwrap = document.getElementById("textwrap")
-  var lines = insertwwtlit(bybook[name])
+  var lines = insertwwtlit(bybook[booktag])
   textwrap.innerHTML = tohtml(lines)
 
   ``.``
@@ -627,7 +665,7 @@ from the html formatting function. insertwwtlit slices the lines open,
 puts in word by word where selected, and returns the lines with the
 word by word html.
 
-``/funcs
+``/insertwwtlit
 // insertwwtlit inserts translit and word by word as selected on checkboxes into lines
 function insertwwtlit(lines) {
   out = []
@@ -699,11 +737,12 @@ split and seperate the field with verse from the rest
     var juice = f.slice(1).join("\t")
 ``
 
-if it's a book put it in a header
+if it's a book put it in a header and set the booktag as its it.
 
 ``../book
       var book = juice.replace(/##book /, "")
-      html += "<h2>" + book + "</h2>\n"
+      var booktag = f[0].split(" ")[0]
+      html += "<h2 id='" + booktag + "'>" + book + "</h2>\n"
       continue
 ``
 
@@ -754,7 +793,14 @@ both lines get a div for the text direction. (a span doesn't seem to work). the 
 
 ``./lang a
 var langa = langcodes[sel["a"].value]
-html += "<div dir='" + dir(langa) + "' class='" + dir(langa) + "'>"
+var dir_a = ""
+if (!tlitcheck["a"].checked) {
+  // if not tlit, get dir 
+  dir_a = dir(langa)
+} else {
+  dir_a = "ltr"
+}
+html += "<div dir='" + dir_a + "' class='" + dir_a + "'>"
 ``
 
 create the versenumber sup-tag and give it a click listener that
@@ -779,12 +825,21 @@ print the second language on a new line, give it margin bottom.
 
 ``../lang b
 var langb = langcodes[sel["b"].value]
-html += "<div dir='" + dir(langb) + "' style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</div>"
+var dir_b = ""
+if (!tlitcheck["b"].checked) {
+  // if not tlit, get dir
+  dir_b = dir(langb)
+} else {
+  // if tlit, dir is ltr (for now)
+  dir_b = "ltr"
+}
+  
+html += "<div dir='" + dir_b + "' style='margin-top:10pt; margin-bottom:10pt; display: block'>" + a[i] + "</div>"
 ``
 
 dir gets the direction of text in given language.
 
-``/funcs
+``/dir
 function dir(lang) {
   if (["he", "ar", "fa"].includes(lang)) {
     // right to left
@@ -797,7 +852,7 @@ function dir(lang) {
 
 sethash sets the hash in the url without scrolling directly to it.
 
-``/funcs
+``/sethash
 function sethash(hash) {
   if (history.pushState) {
     history.pushState(null, null, "#" + hash)
@@ -818,7 +873,7 @@ are found by ww.
 you need to use \P{L}.
 
 
-``/funcs
+``/quickfixends
 // quickfixends puts hebrew and greek wordendings back to normal
 function quickfixends(s) {
   s = s.replace(/כ(\P{L})/gu, "ך$1") // actually k$1
