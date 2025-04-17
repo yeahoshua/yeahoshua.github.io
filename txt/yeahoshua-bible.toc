@@ -11,17 +11,17 @@ judges	judges
 2_kings	kings b
 isaiah	yeshuayeaho
 jeremiah	yeremiyeaho
-ezekiel	yechecqial
+ezekiel	yexhecqial
 hosea	hoshea
 joel	yoal
 amos	amos
 obadiah	obadiyeah
 jonah	yonah
 micah	mikah
-nahum	nachum
-habakkuk	chabaquq
+nahum	naxhum
+habakkuk	xhabaquq
 zephaniah	zefaniyeah
-haggai	chagai
+haggai	xhagai
 zechariah	cekariyeah
 malachi	malakhi
 psalms	praises
@@ -34,7 +34,7 @@ ecclesiastes	communer
 esther	ester
 daniel	danial
 ezra	ecra
-nehemiah	nechemiyeah
+nehemiah	nexhemiyeah
 1_chronicles	words of the days a
 2_chronicles	words of the days b
 romans	to the romans
@@ -54,13 +54,13 @@ hebrews	to the hebrews
 james	by yaqob
 1_peter	by peter a
 2_peter	by peter b
-1_john	by yeahochanan a
-2_john	by yeahochanan b
-3_john	by yeahochanan c
+1_john	by yeahoxhanan a
+2_john	by yeahoxhanan b
+3_john	by yeahoxhanan c
 jude	by yeahudas
 matthew	yeahoshua sink-swim-conversation according to matityeaho
 mark	yeahoshua sink-swim-conversation according to mark
 luke	yeahoshua sink-swim-conversation according to luke
 acts	acts of the emissaries
-john	yeahoshua sink-swim-conversation according to yeahochanan
+john	yeahoshua sink-swim-conversation according to yeahoxhanan
 revelation	revelation of yeahoshua sink-swim-conversation
