@@ -58,9 +58,9 @@ james	by yaqob
 2_john	by yeahoxhanan b
 3_john	by yeahoxhanan c
 jude	by yeahudas
-matthew	yeahoshua sink-swim-conversation according to matityeaho
-mark	yeahoshua sink-swim-conversation according to mark
-luke	yeahoshua sink-swim-conversation according to luke
+matthew	yeahoshua sink-swim-chat according to matityeaho
+mark	yeahoshua sink-swim-chat according to mark
+luke	yeahoshua sink-swim-chat according to luke
 acts	acts of the emissaries
-john	yeahoshua sink-swim-conversation according to yeahoxhanan
-revelation	revelation of yeahoshua sink-swim-conversation
+john	yeahoshua sink-swim-chat according to yeahoxhanan
+revelation	revelation of yeahoshua sink-swim-chat
