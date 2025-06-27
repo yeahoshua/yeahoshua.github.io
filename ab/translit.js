@@ -40,6 +40,8 @@ function translit(oldTextContent, translitLatin) {
     // insert blanks in chinese or thai
     var nblanks = (oldTextContent.match(/ /g) || []).length
     var insertBlanks = false
+
+    var greekhused = false
     
     // decompose string. compose again with String.normalize("NFC")
     oldTextContent = oldTextContent.normalize("NFD") // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize
@@ -84,11 +86,20 @@ function translit(oldTextContent, translitLatin) {
 	    if (c.match(/\u0650/) && lprev.match(/ي/)) { continue }
 	}
 
-	// insert greek h accent before last: from ohs to hos, from uhpo to hupo
-	if (c.match(/\u0314/)) {
-	    var l = newTextContent.length
-	    // see https://stackoverflow.com/questions/4364881/inserting-string-at-position-x-of-another-string/4364902
-	    newTextContent = newTextContent.substring(0, l-1) + unicodeDict.get(c) + newTextContent.substring(l-1)
+	/*
+	  greek h. if the next letters are greek vowels followed by a h, put the h now (if we haven't put it yet), otherwise we sometimes end up with ohs instead of hos, uhpo instead of hupo, etc.
+	*/
+	// get the upcoming string
+	var upcoming = oldTextContent.substring(i) // i to the end
+	if (greekhused == false && upcoming.match(/^[αεηιουω]*\u0314/i)) {
+	    newTextContent += "h"
+	    // remember that we put this h, in case it is preceeded by more than one vowel
+	    greekhused = true
+	}
+	// free the greekhused when we come to the h
+	if (c.match(/\u0314/)) { // greek h
+	    greekhused = false
+	    // the h was already put, continue
 	    continue
 	}
 
